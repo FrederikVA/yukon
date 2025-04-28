@@ -148,3 +148,33 @@ void saveDeckToFile(const char *filename) {
     printf("Deck saved to file: %s\n", filename);
 }
 
+void reloadColumnsFromDeck() {
+    // Clear existing columns
+    for (int i = 0; i < 7; i++) {
+        columns[i].top = NULL;
+    }
+
+    // Fill columns row-by-row
+    Card *current = deck;
+    int card_count = 0;
+    while (current != NULL) {
+        int col = card_count % 7;
+        
+        // Add at END of each column
+        if (columns[col].top == NULL) {
+            columns[col].top = current;
+        } else {
+            Card *tail = columns[col].top;
+            while (tail->next != NULL) {
+                tail = tail->next;
+            }
+            tail->next = current;
+        }
+
+        Card *next = current->next;
+        current->next = NULL; // Very important: cut off next chain
+        current = next;
+
+        card_count++;
+    }
+}

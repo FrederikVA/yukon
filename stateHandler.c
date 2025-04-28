@@ -25,12 +25,16 @@ void handleCommand(const char *input) {
         } else if (strcmp(input, "SR") == 0) {
             randomShuffle();
             saveDeckToFile("cards.txt");
+            reloadColumnsFromDeck();
             strcpy(message, "Deck shuffled randomly and saved.");
-        } else if (strncmp(input, "SI", 2) == 0) {
-            riffleShuffle(26); // Default split 26 for now
+        }
+        else if (strncmp(input, "SI", 2) == 0) {
+            riffleShuffle(26);
             saveDeckToFile("cards.txt");
+            reloadColumnsFromDeck(); 
             strcpy(message, "Deck riffle shuffled and saved.");
-        } else if (strcmp(input, "help") == 0) {
+        }
+         else if (strcmp(input, "help") == 0) {
             printHelp();
             strcpy(message, "Help displayed.");
         } else {
