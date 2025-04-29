@@ -13,4 +13,8 @@ extern char lastCommand[100];
 extern char message[200];
 extern char currentFile[100];
 
+extern char cardToMove[3];
+extern char fromColumnOrField[3];
+extern char toColumnOrField[3];
+
 #endif

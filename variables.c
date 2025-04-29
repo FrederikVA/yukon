@@ -21,3 +21,7 @@ char message[200];
 
 // Working file / deck
 char currentFile[100] = "cards.txt";  // Default deck name
+
+char cardToMove[3] = ""; // Card to move
+char fromColumnOrField[3] = ""; // From column or field
+char toColumnOrField[3] = ""; // To column or field

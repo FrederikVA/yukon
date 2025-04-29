@@ -64,7 +64,6 @@ void initGame() {
             current = current->next;
         }
     }
-    sleep(1);
     debugPrintColumnSizes();
 }
 

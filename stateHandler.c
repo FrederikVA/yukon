@@ -7,6 +7,7 @@
 #include "deck.h"
 #include "shuffler.h"
 #include "game.h"
+#include "move.h"
 
 void handleCommand(const char *input) {
     strcpy(lastCommand, input);
@@ -71,10 +72,8 @@ void handleCommand(const char *input) {
             running = 0;
             strcpy(message, "Exiting...");
         } else if (strcmp(input, "P") == 0) {
-            printf("Enters initgame!\n");
             currentPhase = PLAY;
             initGame();
-            printf("Exits initgame!\n");
             strcpy(message, "Game started!");
         } else {
             strcpy(message, "Unknown command in STARTUP phase.");
@@ -84,19 +83,15 @@ void handleCommand(const char *input) {
         if (strcmp(input, "Q") == 0) {
             currentPhase = STARTUP;
             strcpy(message, "Returned to startup.");
-        } else if (strstr(input, "->") != NULL) {
-            // It's a move command
-            char fromPart[20];
-            char toPart[20];
-        
-            if (sscanf(input, "%19[^-]->%19s", fromPart, toPart) == 2) {
-        
-                // TODO: Call moveCard(fromPart, toPart) or similar
+        } else if (strstr(input, "->")) {
+            if (validateMoveInput(input) && validateMove()) {
+                executeMove();
+                strcpy(message, "Move executed successfully!");
             } else {
-                strcpy(message, "Invalid move command format.");
+                strcpy(message, "Move input was invalid or not allowed.");
             }
         } else {
             strcpy(message, "Unknown command in PLAY phase.");
         }
     }
-}
+}    
