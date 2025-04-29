@@ -31,13 +31,9 @@ void handleCommand(const char *input) {
             } else {
                 strcpy(message, "Error: Invalid LD command format.");
             }
-        }
-         else if (strcmp(input, "SW") == 0) {
+        } else if (strcmp(input, "SW") == 0) {
             showDeck();
             strcpy(message, "Deck shown.");
-        } else if (strcmp(input, "P") == 0) {
-            currentPhase = PLAY;
-            strcpy(message, "Game started!");
         } else if (strcmp(input, "QQ") == 0) {
             running = 0;
             strcpy(message, "Quitting program...");
@@ -75,8 +71,8 @@ void handleCommand(const char *input) {
             running = 0;
             strcpy(message, "Exiting...");
         } else if (strcmp(input, "P") == 0) {
-            currentPhase = PLAY;
             printf("Enters initgame!\n");
+            currentPhase = PLAY;
             initGame();
             printf("Exits initgame!\n");
             strcpy(message, "Game started!");
