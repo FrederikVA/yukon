@@ -76,7 +76,9 @@ void handleCommand(const char *input) {
             strcpy(message, "Exiting...");
         } else if (strcmp(input, "P") == 0) {
             currentPhase = PLAY;
+            printf("Enters initgame!\n");
             initGame();
+            printf("Exits initgame!\n");
             strcpy(message, "Game started!");
         } else {
             strcpy(message, "Unknown command in STARTUP phase.");

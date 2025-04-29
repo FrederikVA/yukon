@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "structures.h"
 #include "variables.h"
 #include "deck.h"
@@ -18,6 +19,7 @@ void debugPrintColumnSizes() {
         printf("C%d: %d cards\n", i + 1, count);
     }
     printf("====================\n");
+    fflush(stdout);  // testing if it gets overewritten
 }
 
 void initGame() {
@@ -62,6 +64,7 @@ void initGame() {
             current = current->next;
         }
     }
+    sleep(1);
     debugPrintColumnSizes();
 }
 
