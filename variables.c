@@ -18,3 +18,6 @@ Card *deck = NULL;
 // For printing
 char lastCommand[100];
 char message[200];
+
+// Working file / deck
+char currentFile[100] = "cards.txt";  // Default deck name

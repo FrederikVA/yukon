@@ -4,10 +4,73 @@
 #include "deck.h"
 #include "variables.h"
 
-// Function to shuffle the deck using the riffle shuffle method
+
+int countDeck() {
+    int count = 0;
+    Card *current = deck;
+    while (current != NULL) {
+        count++;
+        current = current->next;
+    }
+    return count;
+}
+
+void randomShuffle() {
+    printf("\n--- Starting Random Shuffle ---\n");
+    printf("Deck size before shuffle: %d\n", countDeck());
+
+    if (countDeck() != 52) {
+        printf("Error: Deck must contain exactly 52 cards to shuffle.\n");
+        return;
+    }
+
+    Card* cards[52] = {NULL};
+    int count = 0;
+    Card* current = deck;
+
+    printf("Copying deck to array...\n");
+    while (current != NULL) {
+        cards[count++] = current;
+        current = current->next;
+    }
+    
+    printf("Deck copied to array. Card count = %d\n", count);
+
+    printf("Shuffling deck (Fisher-Yates)...\n");
+    for (int i = count - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        Card* temp = cards[i];
+        cards[i] = cards[j];
+        cards[j] = temp;
+    }
+
+    // Safety clear pointers
+    printf("Clearing .next pointers...\n");
+    for (int i = 0; i < count; i++) {
+        cards[i]->next = NULL;
+    }
+
+    printf("Rebuilding linked list...\n");
+    for (int i = 0; i < count - 1; i++) {
+        cards[i]->next = cards[i + 1];
+    }
+    cards[count - 1]->next = NULL;
+    deck = cards[0];
+
+    printf("Deck size after shuffle: %d\n", countDeck());
+    if (countDeck() != 52) {
+        printf("Error: Deck corrupted after random shuffle.\n");
+        return;
+    }
+    printf("--- Random Shuffle Done ---\n\n");
+}
+
 void riffleShuffle(int split) {
-    if (deck == NULL) {
-        printf("Deck is empty. Cannot shuffle.\n");
+    printf("\n--- Starting Riffle Shuffle ---\n");
+    printf("Deck size before shuffle: %d\n", countDeck());
+
+    if (countDeck() != 52) {
+        printf("Error: Deck must contain exactly 52 cards to shuffle.\n");
         return;
     }
 
@@ -16,72 +79,71 @@ void riffleShuffle(int split) {
         return;
     }
 
-    // Step 1: Split deck
-    Card* first = deck;
-    Card* second = NULL;
-    Card* current = deck;
+    Card* cards[52] = {NULL};
     int count = 0;
-
-    while (current != NULL && count < split - 1) {
+    Card* current = deck;
+    
+    printf("Copying deck to array...\n");
+    while (current != NULL) {
+        cards[count++] = current;
         current = current->next;
-        count++;
     }
 
-    if (current != NULL) {
-        second = current->next;
-        current->next = NULL; // Break into two lists
+    printf("Deck copied to array. Card count = %d\n", count);
+
+    Card* first[52] = {NULL};
+    Card* second[52] = {NULL};
+
+    for (int i = 0; i < split; i++) {
+        first[i] = cards[i];
+    }
+    for (int i = split; i < 52; i++) {
+        second[i - split] = cards[i];
     }
 
-    // Step 2: Interleave cards
+    // Safety clear pointers
+    printf("Clearing .next pointers...\n");
+    for (int i = 0; i < count; i++) {
+        cards[i]->next = NULL;
+    }
+    
+    printf("Rebuilding linked list (interleaving)...\n");
+    int first_index = 0, second_index = 0;
     Card* newDeck = NULL;
-    Card** tail = &newDeck; // Tail pointer to last card in new deck
+    Card** tail = &newDeck;
 
-    while (first != NULL || second != NULL) {
-        if (first != NULL) {
-            *tail = first;
+    while (first_index < split || second_index < (52 - split)) {
+        if (first_index < split) {
+            *tail = first[first_index++];
             tail = &((*tail)->next);
-            first = first->next;
         }
-        if (second != NULL) {
-            *tail = second;
+        if (second_index < (52 - split)) {
+            *tail = second[second_index++];
             tail = &((*tail)->next);
-            second = second->next;
         }
     }
 
     *tail = NULL;
     deck = newDeck;
-}
 
-
-void randomShuffle() {
-    if (deck == NULL) {
-        printf("Deck is empty. Cannot shuffle.\n");
+    printf("Deck size after riffle shuffle: %d\n", countDeck());
+    if (countDeck() != 52) {
+        printf("Error: Deck corrupted after riffle shuffle.\n");
         return;
     }
-
-    // Step 1: Copy deck to array
-    Card* cards[52];
-    int count = 0;
-    Card* current = deck;
-    while (current != NULL && count < 52) {
-        cards[count++] = current;
-        current = current->next;
-    }
-
-    // Step 2: Fisher-Yates shuffle
-    for (int i = count - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        Card* temp = cards[i];
-        cards[i] = cards[j];
-        cards[j] = temp;
-    }
-
-    // Step 3: Rebuild deck
-    for (int i = 0; i < count - 1; i++) {
-        cards[i]->next = cards[i + 1];
-    }
-    cards[count - 1]->next = NULL;
-    deck = cards[0];
+    printf("--- Riffle Shuffle Done ---\n\n");
 }
+
+void printDeckDebug() {
+    printf("DEBUG: Printing deck after shuffle:\n");
+    Card *current = deck;
+    int count = 0;
+    while (current != NULL) {
+        printf("%c%c ", current->rank, current->suit);
+        current = current->next;
+        count++;
+    }
+    printf("\nTotal cards in deck: %d\n", count);
+}
+
 

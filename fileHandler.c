@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include <string.h>
 #include "structures.h"
 #include "variables.h"
+#include "shuffler.h"
 
 extern const char ranks[];
 extern const char suits[];
@@ -94,25 +96,27 @@ void loadBoardFromFile(const char *filename) {
 }
 
 void loadDeck(const char *filename) {
-    if (filename == NULL || strcmp(filename, "") == 0) {
-        filename = "cards.txt"; // default filename
+    if (filename != NULL && strcmp(filename, "") != 0) {
+        snprintf(currentFile, sizeof(currentFile), "%s.txt", filename); // Save new filename
     }
+    char fullPath[200];
+    snprintf(fullPath, sizeof(fullPath), "decks/%s", currentFile);
 
-    FILE *f = fopen(filename, "r");
+    FILE *f = fopen(fullPath, "r");
     if (!f) {
-        printf("Deck file does not exist. Creating default deck file: %s\n", filename);
-        createDeckFile(filename);
+        printf("Deck file does not exist. Creating default deck file: %s\n", fullPath);
+        createDeckFile(fullPath);
     } else {
-        fclose(f); // We only opened to check existence
+        fclose(f);
     }
 
-    int lines = countLinesInFile(filename);
+    int lines = countLinesInFile(fullPath);
     if (lines != 52) {
         printf("Deck file is invalid (expected 52 lines, found %d)\n", lines);
         return;
     }
 
-    loadBoardFromFile(filename);
+    loadBoardFromFile(fullPath);
 }
 
 void showDeck() {
@@ -126,15 +130,42 @@ void showDeck() {
     }
 }
 
-void saveDeckToFile(const char *filename) {
+void showDeckFiles() {
+    struct dirent *entry;
+    DIR *dp = opendir("decks");
+
+    if (dp == NULL) {
+        printf("Error: Could not open decks folder.\n");
+        return;
+    }
+
+    printf("Available decks:\n");
+    while ((entry = readdir(dp))) {
+        if (entry->d_type == DT_REG) { // Regular file
+            printf(" - %s\n", entry->d_name);
+        }
+    }
+
+    closedir(dp);
+}
+
+void saveDeckToFile() {
     if (deck == NULL) {
         printf("No deck to save.\n");
         return;
     }
 
-    FILE *f = fopen(filename, "w");
+    if (countDeck() != 52) {
+        printf("Deck is not valid (not 52 cards). Save cancelled.\n");
+        return;
+    }
+
+    char fullPath[200];
+    snprintf(fullPath, sizeof(fullPath), "decks/%s", currentFile);
+
+    FILE *f = fopen(fullPath, "w");
     if (!f) {
-        printf("Failed to open file for writing: %s\n", filename);
+        printf("Failed to open file for writing: %s\n", fullPath);
         return;
     }
 
@@ -145,36 +176,112 @@ void saveDeckToFile(const char *filename) {
     }
 
     fclose(f);
-    printf("Deck saved to file: %s\n", filename);
+    printf("Deck saved to file: %s\n", fullPath);
+}
+
+int validateDeckFile(const char *filename) {
+    const char *validRanks = "A23456789TJQK";
+    const char *validSuits = "CDHS"; // Clubs, Diamonds, Hearts, Spades
+
+    int cardSeen[13][4] = {0}; // [rank][suit] table
+
+    FILE *f = fopen(filename, "r");
+    if (!f) {
+        printf("Error opening file for validation: %s\n", filename);
+        return 0;
+    }
+
+    char line[10];
+    int lineCount = 0;
+
+    while (fgets(line, sizeof(line), f)) {
+        line[strcspn(line, "\n")] = 0; // Remove newline
+        if (strlen(line) != 2) {
+            printf("Invalid card format: '%s'\n", line);
+            fclose(f);
+            return 0;
+        }
+
+        char rank = line[0];
+        char suit = line[1];
+
+        const char *rankPtr = strchr(validRanks, rank);
+        const char *suitPtr = strchr(validSuits, suit);
+
+        if (!rankPtr || !suitPtr) {
+            printf("Invalid card detected: '%s'\n", line);
+            fclose(f);
+            return 0;
+        }
+
+        int rankIndex = rankPtr - validRanks;
+        int suitIndex = suitPtr - validSuits;
+
+        if (cardSeen[rankIndex][suitIndex]) {
+            printf("Duplicate card detected: '%s'\n", line);
+            fclose(f);
+            return 0;
+        }
+
+        cardSeen[rankIndex][suitIndex] = 1;
+        lineCount++;
+    }
+
+    fclose(f);
+
+    if (lineCount != 52) {
+        printf("Deck does not contain exactly 52 cards (found %d).\n", lineCount);
+        return 0;
+    }
+
+    return 1; // OK
+}
+
+void clearColumns() {
+    for (int i = 0; i < 7; i++) {
+        Card *current = columns[i].top;
+        while (current != NULL) {
+            Card *next = current->next;
+            free(current);
+            current = next;
+        }
+        columns[i].top = NULL;
+    }
 }
 
 void reloadColumnsFromDeck() {
-    // Clear existing columns
-    for (int i = 0; i < 7; i++) {
-        columns[i].top = NULL;
-    }
+    clearColumns();
 
-    // Fill columns row-by-row
     Card *current = deck;
     int card_count = 0;
+
     while (current != NULL) {
         int col = card_count % 7;
-        
-        // Add at END of each column
+
+        // Copy the card (deep copy)
+        Card *copy = (Card *)malloc(sizeof(Card));
+        if (!copy) {
+            printf("Memory allocation failed while copying card!\n");
+            exit(1);
+        }
+
+        copy->rank = current->rank;
+        copy->suit = current->suit;
+        copy->face_up = current->face_up;
+        copy->next = NULL;
+
+        // Append to the end of the column
         if (columns[col].top == NULL) {
-            columns[col].top = current;
+            columns[col].top = copy;
         } else {
             Card *tail = columns[col].top;
             while (tail->next != NULL) {
                 tail = tail->next;
             }
-            tail->next = current;
+            tail->next = copy;
         }
 
-        Card *next = current->next;
-        current->next = NULL; // Very important: cut off next chain
-        current = next;
-
+        current = current->next;
         card_count++;
     }
 }

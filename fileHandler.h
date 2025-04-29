@@ -5,7 +5,11 @@
 void createDeckFile(const char *filename);
 int countLinesInFile(const char *filename);
 void loadBoardFromFile(const char *filename);
-void saveDeckToFile(const char *filename);
+void saveDeckToFile();
+int validateDeckFile(const char *filename);
+void showDeckFiles();
+
+void clearColumns();
 void reloadColumnsFromDeck();
 
 void loadDeck(const char *filename);
