@@ -1,6 +1,7 @@
 // gui_buttons.c
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
+
 #include "gui.h"
 #include "stateHandler.h"
 #include <string.h>
@@ -46,7 +47,7 @@ void drawButtons(SDL_Renderer *renderer, TTF_Font *font, int screenWidth, int sc
         SDL_RenderDrawRect(renderer, &btn->rect);
 
         // Render label text
-        SDL_Color white = {255, 255, 255};
+        SDL_Color white = {255, 255, 255, 255}; // opaque white
         SDL_Surface *textSurface = TTF_RenderText_Blended(font, btn->label, white);
         SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
 
