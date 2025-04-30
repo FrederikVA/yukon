@@ -4,11 +4,18 @@
 #include "printer.h"
 #include "deck.h"
 #include "stateHandler.h"
+#include "gui.h"  
 
+int main(int argc, char *argv[]) {
+    // GUI mode if --gui is passed (./yukon --gui)
+    if (argc > 1 && strcmp(argv[1], "--gui") == 0) {
+        printf("Launching GUI mode...\n");
+        runGUI();  // SDL2 entry
+        return 0;
+    }
 
-int main() {
+    // Terminal mode (default)
     char input[100];
-
     strcpy(lastCommand, "None");
     strcpy(message, "Welcome to Yukon! Type 'help' for commands.");
     createDefaultDeck();
