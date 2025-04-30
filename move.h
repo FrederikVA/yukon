@@ -19,6 +19,7 @@ int validateMoveInput(const char *input);
 int validateMove();
 int validateFromMove();
 int validateToMove();
+void inferCardToMoveFromColumn();
 
 // Helpers
 int getRankIndex(char rank);
@@ -28,5 +29,6 @@ Card* findCardInColumn(Pile *pile, const char *cardCode);
 // Execute move
 void executeMove();
 void postMoveUpdate(Pile *source);
+void winCondition();
 
 #endif

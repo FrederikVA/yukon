@@ -59,16 +59,17 @@ void printBoard() {
             }
         }
 
-        // Print fields if row < 4
-        if (row == 0) {
-            printf("  F1 [    ]");
-        } else if (row == 1) {
-            printf("  F2 [    ]");
-        } else if (row == 2) {
-            printf("  F3 [    ]");
-        } else if (row == 3) {
-            printf("  F4 [    ]");
-        }
+        if (row < 4) {
+            Card *current = foundations[row].top;
+            while (current && current->next) {
+                current = current->next;
+            }
+            if (current) {
+                printf("  F%d [ %c%c ]", row + 1, current->rank, current->suit);
+            } else {
+                printf("  F%d [    ]", row + 1);
+            }
+        }        
         printf("\n");
     }
 }
@@ -102,5 +103,6 @@ void printHelp() {
     printf("P — Play (start game)\n");
     printf("Q — Quit playing (return to startup)\n");
     printf("QQ — Quit program\n\n");
+    printf("SD - Show deck files\n");
 }
 

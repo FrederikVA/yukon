@@ -13,6 +13,28 @@ void resetMoveState() {
     strcpy(currentMove.toColumnOrField, "");
 }
 
+void inferCardToMoveFromColumn() {
+    if (currentMove.cardToMove[0] != '\0') return;
+
+    int fromCol = currentMove.fromColumnOrField[1] - '1';
+    Pile *source = (currentMove.fromColumnOrField[0] == 'C') ? &columns[fromCol] : &foundations[fromCol];
+
+    Card *lastFaceUp = NULL;
+    Card *current = source->top;
+    while (current) {
+        if (current->face_up) {
+            lastFaceUp = current;
+        }
+        current = current->next;
+    }
+
+    if (lastFaceUp) {
+        currentMove.cardToMove[0] = lastFaceUp->rank;
+        currentMove.cardToMove[1] = lastFaceUp->suit;
+        currentMove.cardToMove[2] = '\0';
+    }
+}
+
 int validateMoveInput(const char *input) {
     resetMoveState();
 
@@ -96,6 +118,7 @@ Card* findCardInColumn(Pile *pile, const char *cardCode) {
 }
 
 int validateFromMove() {
+    inferCardToMoveFromColumn();
     int fromCol = currentMove.fromColumnOrField[1] - '1';
     Pile *source = (currentMove.fromColumnOrField[0] == 'C') ? &columns[fromCol] : &foundations[fromCol];
 
@@ -124,6 +147,12 @@ int validateFromMove() {
 }
 
 int validateToMove() {
+    inferCardToMoveFromColumn();
+    printf("🛠 validateToMove(): move = %s from %s to %s\n",
+    currentMove.cardToMove,
+    currentMove.fromColumnOrField,
+    currentMove.toColumnOrField);
+
     int toCol = currentMove.toColumnOrField[1] - '1';
     Pile *target = (currentMove.toColumnOrField[0] == 'C') ? &columns[toCol] : &foundations[toCol];
 
@@ -151,18 +180,19 @@ int validateToMove() {
         }
         return 1;
     } else {
-        // Moving to foundation
-        Card *top = target->top;
-        if (!top) {
+        Card *last = target->top;
+        if (!last) {
             if (moveRank == 'A') return 1;
             printf("Only Aces can be placed in empty foundations.\n");
             return 0;
         }
-        if (top->suit != moveSuit) {
+        while (last->next) last = last->next; // go to last card in foundation
+
+        if (last->suit != moveSuit) {
             printf("Foundation must be same suit.\n");
             return 0;
         }
-        if (getRankIndex(moveRank) != getRankIndex(top->rank) + 1) {
+        if (getRankIndex(moveRank) != getRankIndex(last->rank) + 1) {
             printf("Card must be one rank higher than foundation top.\n");
             return 0;
         }
@@ -180,6 +210,7 @@ int validateMove() {
 
 
 void executeMove() {
+    inferCardToMoveFromColumn();
     int fromCol = currentMove.fromColumnOrField[1] - '1';
     int toCol = currentMove.toColumnOrField[1] - '1';
 
@@ -249,6 +280,7 @@ void executeMove() {
     }
 
     postMoveUpdate(source);
+    winCondition();
 }
 
 void postMoveUpdate(Pile *source) {
@@ -263,5 +295,24 @@ void postMoveUpdate(Pile *source) {
     if (!current->face_up) {
         current->face_up = 1;
         printf("Flipped card %c%c face up.\n", current->rank, current->suit);
+    }
+}
+
+void winCondition() {
+    if (currentMove.toColumnOrField[0] == 'F' && currentMove.cardToMove[0] == 'K') {
+        int allFoundationsFull = 1;
+        for (int i = 0; i < 4; i++) {
+            Card *current = foundations[i].top;
+            while (current && current->next) {
+                current = current->next;
+            }
+            if (!current || current->rank != 'K') {
+                allFoundationsFull = 0;
+                break;
+            }
+        }
+        if (allFoundationsFull) {
+            printf(" Congratulations! You've won the game! ");
+        }
     }
 }

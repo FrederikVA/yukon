@@ -24,6 +24,8 @@ void debugPrintColumnSizes() {
 
 void initGame() {
     clearColumns();
+    clearFoundations();
+    // clearFoundations();
 
     Card *current = deck;
     int col_sizes[7] = {1, 6, 7, 8, 9, 10, 11}; // total cards per column

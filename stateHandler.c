@@ -82,6 +82,8 @@ void handleCommand(const char *input) {
     } else if (currentPhase == PLAY) {
         if (strcmp(input, "Q") == 0) {
             currentPhase = STARTUP;
+            clearColumns();
+            clearFoundations();
             strcpy(message, "Returned to startup.");
         } else if (strstr(input, "->")) {
             if (validateMoveInput(input) && validateMove()) {

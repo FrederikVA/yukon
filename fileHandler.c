@@ -249,6 +249,18 @@ void clearColumns() {
     }
 }
 
+void clearFoundations() {
+    for (int i = 0; i < 4; i++) {
+        Card *current = foundations[i].top;
+        while (current != NULL) {
+            Card *next = current->next;
+            free(current);
+            current = next;
+        }
+        foundations[i].top = NULL;
+    }
+}
+
 void reloadColumnsFromDeck() {
     clearColumns();
 

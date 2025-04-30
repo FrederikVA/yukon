@@ -10,6 +10,7 @@ int validateDeckFile(const char *filename);
 void showDeckFiles();
 
 void clearColumns();
+void clearFoundations();
 void reloadColumnsFromDeck();
 
 void loadDeck(const char *filename);
