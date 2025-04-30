@@ -7,6 +7,8 @@
 #include "gui.h"  
 
 int main(int argc, char *argv[]) {
+    createDefaultDeck();
+
     // GUI mode if --gui is passed (./yukon --gui)
     if (argc > 1 && strcmp(argv[1], "--gui") == 0) {
         printf("Launching GUI mode...\n");
@@ -18,7 +20,6 @@ int main(int argc, char *argv[]) {
     char input[100];
     strcpy(lastCommand, "None");
     strcpy(message, "Welcome to Yukon! Type 'help' for commands.");
-    createDefaultDeck();
 
     while (running) {
         printToTerminal();
