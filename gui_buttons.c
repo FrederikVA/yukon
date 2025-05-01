@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define BUTTON_WIDTH 300
+#define BUTTON_WIDTH 250
 #define BUTTON_HEIGHT 50
 #define BUTTON_PADDING 20
 
@@ -20,11 +20,10 @@ typedef struct {
 static Button buttons[] = {
     {{0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "LOAD DECK", "LD"},
     {{0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "SHOW DECK", "SW"},
-    {{0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "SHUFFLE (SPLIT)", "SI"},
-    {{0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "SHUFFLE (RANDOM)", "SR"},
+    {{0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "SPLIT-SHUFFLE", "SI"},
+    {{0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "RANDOM-SHUFFLE", "SR"},
     {{0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "SAVED DECKS", "SD"},
-    {{0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "PLAY GAME", "P"},
-    {{0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "HELP", "help"}
+    {{0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "PLAY GAME", "P"}
 };
 
 static const int buttonCount = sizeof(buttons) / sizeof(Button);
