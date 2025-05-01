@@ -10,7 +10,7 @@
 #include "variables.h"
 
 void runGUI() {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0 || TTF_Init() != 0 || IMG_Init(IMG_INIT_PNG) == 0) {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0 || TTF_Init() != 0) {
         SDL_Log("Init Error: %s\n", SDL_GetError());
         return;
     }
@@ -35,7 +35,7 @@ void runGUI() {
 
     CardTextures cardTextures;
     if (!loadCardTextures(renderer, &cardTextures)) {
-        SDL_Log("Could not load card textures!\n");
+        SDL_Log("Failed to load card textures.\n");
         TTF_CloseFont(font);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(win);
@@ -48,35 +48,36 @@ void runGUI() {
     int mouseX = 0, mouseY = 0;
 
     while (!quit) {
-        SDL_GetMouseState(&mouseX, &mouseY);
-
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 quit = 1;
             } else if (e.type == SDL_MOUSEBUTTONDOWN) {
                 handleButtonClick(e.button.x, e.button.y);
+            } else if (e.type == SDL_MOUSEMOTION) {
+                mouseX = e.motion.x;
+                mouseY = e.motion.y;
             }
-        }   
+        }
 
         SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
         SDL_RenderClear(renderer);
 
+        // Only draw buttons in STARTUP mode
         if (currentPhase == STARTUP) {
             drawButtons(renderer, font, 300, 600);
-        } else if (currentPhase == PLAY) {
-            drawColumns(renderer, font, &cardTextures, mouseX, mouseY, 1);  // if in PLAY
         }
+
+        // Pass centered = true only in PLAY mode
+        drawColumns(renderer, font, &cardTextures, mouseX, mouseY, currentPhase == PLAY);
 
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
     }
-
 
     freeCardTextures(&cardTextures);
     TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(win);
     TTF_Quit();
-    IMG_Quit();
     SDL_Quit();
 }

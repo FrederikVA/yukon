@@ -67,15 +67,15 @@ static SDL_Texture* getFaceTexture(CardTextures *t, char rank, char suit) {
 
 SDL_Color getSuitColor(char suit) {
     switch (suit) {
-        case 'H': return (SDL_Color){255, 0, 0, 255};       // Red
-        case 'D': return (SDL_Color){255, 128, 0, 255};     // Orange
-        case 'C': return (SDL_Color){50, 100, 200, 255};    // Blue
-        case 'S': return (SDL_Color){0, 0, 0, 255};         // Black
-        default:  return (SDL_Color){30, 30, 30, 255};      // Fallback dark gray
+        case 'H': return (SDL_Color){255, 0, 0, 255};
+        case 'D': return (SDL_Color){255, 128, 0, 255};
+        case 'C': return (SDL_Color){50, 100, 200, 255};
+        case 'S': return (SDL_Color){0, 0, 0, 255};
+        default: return (SDL_Color){30, 30, 30, 255};
     }
 }
 
-void drawCardImage(SDL_Renderer *r, TTF_Font *font, CardTextures *t, Card *card, int x, int y, int mouseX, int mouseY) {
+void drawCardImage(SDL_Renderer *r, TTF_Font *font, CardTextures *t, Card *card, int x, int y, int highlight) {
     SDL_Rect rect = {x, y, CARD_WIDTH, CARD_HEIGHT};
 
     if (!card->face_up) {
@@ -83,13 +83,11 @@ void drawCardImage(SDL_Renderer *r, TTF_Font *font, CardTextures *t, Card *card,
         return;
     }
 
-    // Draw white background + border
     SDL_SetRenderDrawColor(r, 255, 255, 255, 255);
     SDL_RenderFillRect(r, &rect);
     SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
     SDL_RenderDrawRect(r, &rect);
 
-    // Rank text
     char rank[3] = "";
     if (card->rank == 'T') {
         strcpy(rank, "10");
@@ -100,14 +98,12 @@ void drawCardImage(SDL_Renderer *r, TTF_Font *font, CardTextures *t, Card *card,
 
     SDL_Color color = getSuitColor(card->suit);
 
-    // Face artwork (if any)
     SDL_Texture *face = getFaceTexture(t, card->rank, card->suit);
     if (face) {
         SDL_Rect faceRect = {x, y, CARD_WIDTH, CARD_HEIGHT};
         SDL_RenderCopy(r, face, NULL, &faceRect);
     }
 
-    // Rank (top-left)
     SDL_Surface *surf = TTF_RenderText_Blended(font, rank, color);
     SDL_Texture *rankTex = SDL_CreateTextureFromSurface(r, surf);
     SDL_Rect rankRect = {x + 4, y + 3, surf->w, surf->h};
@@ -115,14 +111,12 @@ void drawCardImage(SDL_Renderer *r, TTF_Font *font, CardTextures *t, Card *card,
     SDL_FreeSurface(surf);
     SDL_DestroyTexture(rankTex);
 
-    // Suit icon (top-right)
     SDL_Texture *suitTex = getSuitTexture(t, card->suit);
     if (suitTex) {
         SDL_Rect iconRect = {x + CARD_WIDTH - 22, y + 4, 20, 20};
         SDL_RenderCopy(r, suitTex, NULL, &iconRect);
     }
 
-    // Rank (bottom-right, upside-down)
     SDL_Surface *revSurf = TTF_RenderText_Blended(font, rank, color);
     SDL_Texture *revTex = SDL_CreateTextureFromSurface(r, revSurf);
     int rw = revSurf->w, rh = revSurf->h;
@@ -131,16 +125,13 @@ void drawCardImage(SDL_Renderer *r, TTF_Font *font, CardTextures *t, Card *card,
     SDL_FreeSurface(revSurf);
     SDL_DestroyTexture(revTex);
 
-    // Suit (bottom-left, upside-down)
     if (suitTex) {
         SDL_Rect suitRotated = {x + 4, y + CARD_HEIGHT - 24, 20, 20};
         SDL_RenderCopyEx(r, suitTex, NULL, &suitRotated, 180, NULL, SDL_FLIP_NONE);
     }
 
-    // Highlight on hover
-    SDL_Rect cardRect = {x, y, CARD_WIDTH, CARD_HEIGHT};
-    if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &cardRect)) {
-        SDL_SetRenderDrawColor(r, 255, 255, 0, 255); // yellow
-        SDL_RenderDrawRect(r, &cardRect);
+    if (highlight) {
+        SDL_SetRenderDrawColor(r, 255, 255, 0, 255);
+        SDL_RenderDrawRect(r, &rect);
     }
 }

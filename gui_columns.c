@@ -1,6 +1,5 @@
 #include "gui_columns.h"
 #include "variables.h"
-#include "card_images.h"
 
 #define COLUMN_START_X 330
 #define COLUMN_START_Y 120
@@ -16,23 +15,38 @@ void drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures,
     for (int col = 0; col < 7; col++) {
         int x = startX + col * (CARD_WIDTH + COLUMN_GAP_X);
         int y = startY;
-        Card *current = columns[col].top;
 
+        Card *cards[100];
+        int count = 0;
+        Card *current = columns[col].top;
         while (current) {
-            drawCardImage(renderer, font, textures, current, x, y, mouseX, mouseY);
-            y += CARD_GAP_Y;
+            cards[count++] = current;
             current = current->next;
+        }
+
+        int hoveredIndex = -1;
+        for (int i = 0; i < count; i++) {
+            SDL_Rect rect = {x, startY + i * CARD_GAP_Y, CARD_WIDTH, CARD_HEIGHT};
+            if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &rect)) {
+                hoveredIndex = i;
+            }
+        }
+
+        y = startY;
+        for (int i = 0; i < count; i++) {
+            int highlight = (i == hoveredIndex);
+            drawCardImage(renderer, font, textures, cards[i], x, y, highlight);
+            y += CARD_GAP_Y;
         }
     }
 
-    if (!centered) {
-        // Only show foundation pile layout when not centered (e.g., startup)
+    if (centered) {
         for (int f = 0; f < 4; f++) {
             int x = 920;
             int y = 40 + f * (CARD_HEIGHT + 20);
             Card *top = foundations[f].top;
             if (top) {
-                drawCardImage(renderer, font, textures, top, x, y, mouseX, mouseY);
+                drawCardImage(renderer, font, textures, top, x, y, 0);
             } else {
                 SDL_Rect empty = {x, y, CARD_WIDTH, CARD_HEIGHT};
                 SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
@@ -41,5 +55,3 @@ void drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures,
         }
     }
 }
-
-

@@ -22,6 +22,7 @@ typedef struct {
 
 int loadCardTextures(SDL_Renderer *renderer, CardTextures *textures);
 void freeCardTextures(CardTextures *textures);
-void drawCardImage(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures, Card *card, int x, int y, int mouseX, int mouseY);
+SDL_Color getSuitColor(char suit);
+void drawCardImage(SDL_Renderer *r, TTF_Font *font, CardTextures *t, Card *card, int x, int y, int highlight);
 
 #endif
