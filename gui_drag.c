@@ -54,12 +54,10 @@ void attemptDropAt(int x, int y) {
     for (int i = 0; i < 7; i++) {
         int colX = startX + i * (CARD_WIDTH + 10);
         int colY = startY;
-        int cardCount = 0;
         Card *curr = columns[i].top;
         while (curr) {
             colY += 30;  // stack spacing
             curr = curr->next;
-            cardCount++;
         }
         SDL_Rect rect = {colX, colY, CARD_WIDTH, CARD_HEIGHT};
         if (SDL_PointInRect(&(SDL_Point){x, y}, &rect)) {

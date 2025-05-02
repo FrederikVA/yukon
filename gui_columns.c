@@ -49,10 +49,14 @@ Card *drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures
         for (int f = 0; f < 4; f++) {
             int x = 920;
             int y = 40 + f * (CARD_HEIGHT + 20);
-            Card *top = foundations[f].top;
-            if (top) {
-                drawCardImage(renderer, font, textures, top, x, y, 0);
-            } else {
+            Card *current = foundations[f].top;
+            while (current && current->next) {
+                current = current->next;
+            }
+            if (current) {
+                drawCardImage(renderer, font, textures, current, x, y, 0);
+            }
+             else {
                 SDL_Rect empty = {x, y, CARD_WIDTH, CARD_HEIGHT};
                 SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
                 SDL_RenderDrawRect(renderer, &empty);
