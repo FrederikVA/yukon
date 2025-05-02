@@ -9,6 +9,7 @@
 #include "card_images.h"
 #include "variables.h"
 #include "gui_drag.h"
+#include "move.h"
 
 #define CARD_WIDTH 60
 #define CARD_HEIGHT 90
@@ -78,6 +79,28 @@ void runGUI() {
                             break;
                         }
                     }
+
+                    if (e.button.clicks == 2 && hoveredCard) {
+                        // Make sure it's the last card in its column
+                        Card *curr = columns[colIndex].top;
+                        while (curr && curr->next) {
+                            curr = curr->next;
+                        }
+                    
+                        if (curr == hoveredCard) {
+                            char src[10], cmd[20];
+                            snprintf(src, sizeof(src), "C%d:%c%c", colIndex + 1, hoveredCard->rank, hoveredCard->suit);
+                    
+                            for (int f = 0; f < 4; f++) {
+                                snprintf(cmd, sizeof(cmd), "%s->F%d", src, f + 1);
+                                if (validateMoveInput(cmd) && validateMove()) {
+                                    executeMove();
+                                    strcpy(message, "Card moved to foundation!");
+                                    break;
+                                }
+                            }
+                        }
+                    }                                      
 
                     if (hoveredCard) {
                         startDragFromColumn(hoveredCard, colIndex);
