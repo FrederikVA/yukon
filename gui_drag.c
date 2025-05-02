@@ -56,23 +56,36 @@ void attemptDropAt(int x, int y) {
     int targetCol = -1;
     int targetFoundation = -1;
 
-    // 1. Check columns (centered layout)
+    // Check columns (centered layout)
     int startX = (1000 - (7 * (CARD_WIDTH + 10) - 10)) / 2;
     int startY = 40;
 
     for (int i = 0; i < 7; i++) {
         int colX = startX + i * (CARD_WIDTH + 10);
-        int colY = startY;
+        int y = startY;
+
         Card *curr = columns[i].top;
+        int found = 0;
         while (curr) {
-            colY += 30;  // stack spacing
+            SDL_Rect rect = {colX, y, CARD_WIDTH, CARD_HEIGHT};
+            if (SDL_PointInRect(&(SDL_Point){x, y}, &rect)) {
+                targetCol = i;
+                found = 1;
+                break;
+            }
+            y += 30;
             curr = curr->next;
         }
-        SDL_Rect rect = {colX, colY, CARD_WIDTH, CARD_HEIGHT};
-        if (SDL_PointInRect(&(SDL_Point){x, y}, &rect)) {
-            targetCol = i;
-            break;
+
+        if (!found && columns[i].top == NULL) {
+            // If column is empty, allow drop in its placeholder
+            SDL_Rect rect = {colX, y, CARD_WIDTH, CARD_HEIGHT};
+            if (SDL_PointInRect(&(SDL_Point){x, y}, &rect)) {
+                targetCol = i;
+            }
         }
+
+        if (targetCol != -1) break;
     }
 
     // 2. Check foundations (right side)
