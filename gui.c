@@ -48,20 +48,24 @@ void runGUI() {
     int quit = 0;
     int mouseX = 0, mouseY = 0;
 
-    while (!quit) {
+    while (!quit && running) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 quit = 1;
+                running = 0;
             } else if (e.type == SDL_MOUSEBUTTONDOWN) {
                 if (currentPhase == STARTUP) {
                     handleButtonClick(e.button.x, e.button.y);
                 } else if (currentPhase == PLAY && e.button.button == SDL_BUTTON_LEFT) {
+                    // Check if the exit button was clicked
+                    handleExitButtonClick(e.button.x, e.button.y);
+                
                     int colIndex = -1;
                     Card *hoveredCard = drawColumns(renderer, font, &cardTextures, mouseX, mouseY, currentPhase == PLAY, &colIndex);
                     if (hoveredCard) {
                         startDragFromColumn(hoveredCard, colIndex);
                     }
-                }
+                }                
             } else if (e.type == SDL_MOUSEBUTTONUP) {
                 if (currentPhase == PLAY && e.button.button == SDL_BUTTON_LEFT) {
                     stopDrag(e.button.x, e.button.y);
@@ -79,9 +83,11 @@ void runGUI() {
         SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
         SDL_RenderClear(renderer);
 
-        // Only draw buttons in STARTUP mode
+        // Only draw menu buttons in STARTUP mode
         if (currentPhase == STARTUP) {
             drawButtons(renderer, font, 300, 600);
+        } else if (currentPhase == PLAY) {
+            drawExitGameButton(renderer, font, 1000, 600);
         }
 
         int colIndex;

@@ -19,6 +19,13 @@ Card *drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures
         int x = startX + col * (CARD_WIDTH + COLUMN_GAP_X);
         int y = startY;
 
+        // Draw placeholder behind the bottom card
+        if (centered) {
+            SDL_Rect empty = {x, y, CARD_WIDTH, CARD_HEIGHT};
+            SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+            SDL_RenderDrawRect(renderer, &empty);
+        }
+
         Card *cards[100];
         int count = 0;
         Card *current = columns[col].top;
@@ -49,6 +56,7 @@ Card *drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures
         for (int f = 0; f < 4; f++) {
             int x = 920;
             int y = 40 + f * (CARD_HEIGHT + 20);
+            
             Card *current = foundations[f].top;
             while (current && current->next) {
                 current = current->next;
