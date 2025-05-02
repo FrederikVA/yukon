@@ -8,9 +8,12 @@
 #define CARD_GAP_Y 30
 #define COLUMN_GAP_X 10
 
-void drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures, int mouseX, int mouseY, int centered) {
+Card *drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures, int mouseX, int mouseY, int centered, int *outColumnIndex) {
     int startX = centered ? (1000 - (7 * (CARD_WIDTH + COLUMN_GAP_X) - COLUMN_GAP_X)) / 2 : 330;
     int startY = centered ? 40 : 120;
+
+    Card *hoveredCard = NULL;
+    int hoveredCol = -1;
 
     for (int col = 0; col < 7; col++) {
         int x = startX + col * (CARD_WIDTH + COLUMN_GAP_X);
@@ -29,6 +32,8 @@ void drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures,
             SDL_Rect rect = {x, startY + i * CARD_GAP_Y, CARD_WIDTH, CARD_HEIGHT};
             if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &rect)) {
                 hoveredIndex = i;
+                hoveredCard = cards[i];
+                hoveredCol = col;
             }
         }
 
@@ -54,4 +59,7 @@ void drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures,
             }
         }
     }
+
+    if (outColumnIndex) *outColumnIndex = hoveredCol;
+    return hoveredCard;
 }

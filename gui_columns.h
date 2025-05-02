@@ -5,6 +5,6 @@
 #include <SDL_ttf.h>
 #include "card_images.h"
 
-void drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures, int mouseX, int mouseY, int centered);
+Card *drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures, int mouseX, int mouseY, int centered, int *outColumnIndex);
 
 #endif

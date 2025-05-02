@@ -14,7 +14,7 @@ LDFLAGS = \
 # LDFLAGS += -L/opt/homebrew/opt/openblas/lib -lopenblas
 
 TARGET = yukon
-SRC = main.c printer.c deck.c variables.c fileHandler.c stateHandler.c shuffler.c game.c move.c gui.c gui_buttons.c gui_columns.c gui_cards.c card_images.c
+SRC = main.c printer.c deck.c variables.c fileHandler.c stateHandler.c shuffler.c game.c move.c gui.c gui_buttons.c gui_columns.c gui_cards.c card_images.c gui_drag.c
 
 OBJ = $(SRC:.c=.o)
 

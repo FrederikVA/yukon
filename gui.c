@@ -8,6 +8,7 @@
 #include "gui_columns.h"
 #include "card_images.h"
 #include "variables.h"
+#include "gui_drag.h"
 
 void runGUI() {
     if (SDL_Init(SDL_INIT_VIDEO) != 0 || TTF_Init() != 0) {
@@ -52,10 +53,26 @@ void runGUI() {
             if (e.type == SDL_QUIT) {
                 quit = 1;
             } else if (e.type == SDL_MOUSEBUTTONDOWN) {
-                handleButtonClick(e.button.x, e.button.y);
+                if (currentPhase == STARTUP) {
+                    handleButtonClick(e.button.x, e.button.y);
+                } else if (currentPhase == PLAY && e.button.button == SDL_BUTTON_LEFT) {
+                    int colIndex = -1;
+                    Card *hoveredCard = drawColumns(renderer, font, &cardTextures, mouseX, mouseY, currentPhase == PLAY, &colIndex);
+                    if (hoveredCard) {
+                        startDragFromColumn(hoveredCard, colIndex);
+                    }
+                }
+            } else if (e.type == SDL_MOUSEBUTTONUP) {
+                if (currentPhase == PLAY && e.button.button == SDL_BUTTON_LEFT) {
+                    stopDrag(e.button.x, e.button.y);
+                }
             } else if (e.type == SDL_MOUSEMOTION) {
                 mouseX = e.motion.x;
                 mouseY = e.motion.y;
+                if (dragging.active) {
+                    dragging.mouseX = mouseX;
+                    dragging.mouseY = mouseY;
+                }
             }
         }
 
@@ -67,8 +84,12 @@ void runGUI() {
             drawButtons(renderer, font, 300, 600);
         }
 
-        // Pass centered = true only in PLAY mode
-        drawColumns(renderer, font, &cardTextures, mouseX, mouseY, currentPhase == PLAY);
+        int colIndex;
+        Card *hoveredCard = drawColumns(renderer, font, &cardTextures, mouseX, mouseY, currentPhase == PLAY, &colIndex);
+
+        if (currentPhase == PLAY && dragging.active) {
+            drawDraggedCards(renderer, font, &cardTextures, dragging.mouseX, dragging.mouseY);
+        }
 
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
