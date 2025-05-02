@@ -9,14 +9,23 @@ DragState dragging = {0};
 #define CARD_WIDTH 60
 #define CARD_HEIGHT 90
 
-void startDragFromColumn(Card *card, int columnIndex) {
+void startDragFromPile(Card *card, int pileIndex, int isFoundation) {
     if (!card || !card->face_up) return;
 
     dragging.active = 1;
     dragging.startCard = card;
-    dragging.fromColumnIndex = columnIndex;
+    dragging.fromColumnIndex = pileIndex;
+    dragging.fromFoundation = isFoundation;  
+    dragging.mouseX = 0;
+    dragging.mouseY = 0;
+}
 
-    // Initialize with something; will be updated by mouse motion
+void startDragFromColumn(Card *card, int columnIndex) {
+    if (!card || !card->face_up) return;
+    dragging.active = 1;
+    dragging.startCard = card;
+    dragging.fromColumnIndex = columnIndex;
+    dragging.fromFoundation = 0;  
     dragging.mouseX = 0;
     dragging.mouseY = 0;
 }
@@ -84,7 +93,12 @@ void attemptDropAt(int x, int y) {
         char cmd[20];
         char src[5], dst[5];
 
-        sprintf(src, "C%d", dragging.fromColumnIndex + 1);
+        if (dragging.fromFoundation) {
+            sprintf(src, "F%d", dragging.fromColumnIndex + 1);
+        } else {
+            sprintf(src, "C%d", dragging.fromColumnIndex + 1);
+        }
+
         if (dragging.startCard)
             sprintf(src + strlen(src), ":%c%c", dragging.startCard->rank, dragging.startCard->suit);
 

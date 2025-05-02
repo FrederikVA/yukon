@@ -10,6 +10,9 @@
 #include "variables.h"
 #include "gui_drag.h"
 
+#define CARD_WIDTH 60
+#define CARD_HEIGHT 90
+
 void runGUI() {
     if (SDL_Init(SDL_INIT_VIDEO) != 0 || TTF_Init() != 0) {
         SDL_Log("Init Error: %s\n", SDL_GetError());
@@ -62,6 +65,20 @@ void runGUI() {
                 
                     int colIndex = -1;
                     Card *hoveredCard = drawColumns(renderer, font, &cardTextures, mouseX, mouseY, currentPhase == PLAY, &colIndex);
+
+                    // Check for drag from foundations (only top card)
+                    for (int i = 0; i < 4; i++) {
+                        Card *curr = foundations[i].top;
+                        if (!curr) continue;
+                        while (curr->next) curr = curr->next;  // last card
+
+                        SDL_Rect rect = {920, 40 + i * (CARD_HEIGHT + 20), CARD_WIDTH, CARD_HEIGHT};
+                        if (SDL_PointInRect(&(SDL_Point){e.button.x, e.button.y}, &rect)) {
+                            startDragFromPile(curr, i, 1);  // from foundation
+                            break;
+                        }
+                    }
+
                     if (hoveredCard) {
                         startDragFromColumn(hoveredCard, colIndex);
                     }
