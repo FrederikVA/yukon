@@ -131,22 +131,8 @@ void showDeck() {
 }
 
 void showDeckFiles() {
-    struct dirent *entry;
-    DIR *dp = opendir("decks");
-
-    if (dp == NULL) {
-        printf("Error: Could not open decks folder.\n");
-        return;
-    }
-
-    printf("Available decks:\n");
-    while ((entry = readdir(dp))) {
-        if (entry->d_type == DT_REG) { // Regular file
-            printf(" - %s\n", entry->d_name);
-        }
-    }
-
-    closedir(dp);
+    // cleared for windows
+    printf("removed for windows\n");
 }
 
 void saveDeckToFile() {
