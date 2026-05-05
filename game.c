@@ -7,34 +7,31 @@
 #include "deck.h"
 #include "fileHandler.h"
 
-void debugPrintColumnSizes() {
-    printf("=== Column Sizes ===\n");
-    for (int i = 0; i < 7; i++) {
-        int count = 0;
-        Card *current = columns[i].top;
-        while (current != NULL) {
-            count++;
-            current = current->next;
-        }
-        printf("C%d: %d cards\n", i + 1, count);
+static void appendCardToColumn(int col, Card *card) {
+    if (columns[col].top == NULL) {
+        columns[col].top = card;
+        return;
     }
-    printf("====================\n");
-    fflush(stdout);  // testing if it gets overewritten
+
+    Card *tail = columns[col].top;
+    while (tail->next != NULL) {
+        tail = tail->next;
+    }
+    tail->next = card;
 }
 
 void initGame() {
     clearColumns();
     clearFoundations();
-    // clearFoundations();
 
     Card *current = deck;
     int col_sizes[7] = {1, 6, 7, 8, 9, 10, 11}; // total cards per column
 
-    for (int col = 0; col < 7; col++) {
-        int totalCards = col_sizes[col];
-        int hiddenCards = col; // Column 0 has 0 hidden, column 1 has 1 hidden, etc.
-
-        for (int i = 0; i < totalCards; i++) {
+    for (int row = 0; row < 11; row++) {
+        for (int col = 0; col < 7; col++) {
+            if (row >= col_sizes[col]) {
+                continue;
+            }
             if (current == NULL) {
                 printf("Error: Not enough cards in deck to initialize board.\n");
                 exit(1);
@@ -49,23 +46,11 @@ void initGame() {
 
             copy->rank = current->rank;
             copy->suit = current->suit;
-            copy->face_up = (i < hiddenCards) ? 0 : 1;
+            copy->face_up = (row < col) ? 0 : 1;
             copy->next = NULL;
 
-            // Add to column
-            if (columns[col].top == NULL) {
-                columns[col].top = copy;
-            } else {
-                Card *tail = columns[col].top;
-                while (tail->next != NULL) {
-                    tail = tail->next;
-                }
-                tail->next = copy;
-            }
-
+            appendCardToColumn(col, copy);
             current = current->next;
         }
     }
-    debugPrintColumnSizes();
 }
-

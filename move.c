@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "variables.h"
 #include "move.h"
+#include "history.h"
+#include "timer.h"
 
 MoveState currentMove;  // actual global instance
 
@@ -51,6 +53,14 @@ int validateMoveInput(const char *input) {
     }
 
     // Set toColumnOrField
+    if (to[0] != 'C' && to[0] != 'F') {
+        printf("Invalid destination. Must start with C or F.\n");
+        return 0;
+    }
+    if (to[1] < '1' || to[1] > (to[0] == 'C' ? '7' : '4') || to[2] != '\0') {
+        printf("Invalid destination number. Must be in valid range.\n");
+        return 0;
+    }
     strncpy(currentMove.toColumnOrField, to, 2);
     currentMove.toColumnOrField[2] = '\0';
 
@@ -71,8 +81,16 @@ int validateMoveInput(const char *input) {
 
     // Check for optional card specifier (e.g., "C6:4H")
     if (from[2] == ':') {
+        if (from[0] == 'F') {
+            printf("Foundation moves must not include a card specifier.\n");
+            return 0;
+        }
         char rank = from[3];
         char suit = from[4];
+        if (from[5] != '\0') {
+            printf("Invalid source card format.\n");
+            return 0;
+        }
         if (!((rank >= '2' && rank <= '9') || rank == 'T' || rank == 'J' || rank == 'Q' || rank == 'K' || rank == 'A')) {
             printf("Invalid card rank.\n");
             return 0;
@@ -86,6 +104,10 @@ int validateMoveInput(const char *input) {
         currentMove.cardToMove[1] = suit;
         currentMove.cardToMove[2] = '\0';
     } else {
+        if (from[2] != '\0') {
+            printf("Invalid source format.\n");
+            return 0;
+        }
         // No specific card given
         strcpy(currentMove.cardToMove, "");
     }
@@ -115,6 +137,16 @@ Card* findCardInColumn(Pile *pile, const char *cardCode) {
         current = current->next;
     }
     return NULL;
+}
+
+static int isBottomCard(Pile *pile, Card *card) {
+    Card *current = pile->top;
+    if (!current || !card) return 0;
+
+    while (current->next != NULL) {
+        current = current->next;
+    }
+    return current == card;
 }
 
 int validateFromMove() {
@@ -148,10 +180,6 @@ int validateFromMove() {
 
 int validateToMove() {
     inferCardToMoveFromColumn();
-    printf("🛠 validateToMove(): move = %s from %s to %s\n",
-    currentMove.cardToMove,
-    currentMove.fromColumnOrField,
-    currentMove.toColumnOrField);
 
     int toCol = currentMove.toColumnOrField[1] - '1';
     Pile *target = (currentMove.toColumnOrField[0] == 'C') ? &columns[toCol] : &foundations[toCol];
@@ -180,6 +208,18 @@ int validateToMove() {
         }
         return 1;
     } else {
+        if (currentMove.fromColumnOrField[0] != 'C') {
+            printf("Foundations can only receive cards from columns.\n");
+            return 0;
+        }
+
+        int fromCol = currentMove.fromColumnOrField[1] - '1';
+        Card *movingCard = findCardInColumn(&columns[fromCol], currentMove.cardToMove);
+        if (!isBottomCard(&columns[fromCol], movingCard)) {
+            printf("Only the bottom card in a column can move to a foundation.\n");
+            return 0;
+        }
+
         Card *last = target->top;
         if (!last) {
             if (moveRank == 'A') return 1;
@@ -211,6 +251,7 @@ int validateMove() {
 
 void executeMove() {
     inferCardToMoveFromColumn();
+    recordUndoState();
     int fromCol = currentMove.fromColumnOrField[1] - '1';
     int toCol = currentMove.toColumnOrField[1] - '1';
 
@@ -240,13 +281,14 @@ void executeMove() {
         // Move bottom-most face-up card
         Card *lastFaceUp = NULL;
         Card *beforeLastFaceUp = NULL;
+        Card *previous = NULL;
         current = source->top;
         while (current) {
             if (current->face_up) {
                 lastFaceUp = current;
-                break;
+                beforeLastFaceUp = previous;
             }
-            beforeLastFaceUp = current;
+            previous = current;
             current = current->next;
         }
         movingStart = lastFaceUp;
@@ -312,6 +354,9 @@ void winCondition() {
             }
         }
         if (allFoundationsFull) {
+            long elapsed = getGameElapsed();
+            updateBestCompletionTime(elapsed);
+            stopGameTimer();
             printf(" Congratulations! You've won the game! ");
         }
     }

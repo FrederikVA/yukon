@@ -8,6 +8,9 @@ extern Pile foundations[4];
 extern GamePhase currentPhase;
 extern int running;
 extern Card *deck;
+extern int gameTimerActive;
+extern long gameElapsedBeforePause;
+extern long bestCompletionTime;
 
 extern char lastCommand[100];
 extern char message[200];

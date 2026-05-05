@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <time.h>
 #include "structures.h"
 #include "variables.h"
 
@@ -14,6 +15,12 @@ int running = 1;
 
 // Deck of cards
 Card *deck = NULL;
+
+// Timer state
+int gameTimerActive = 0;
+long gameElapsedBeforePause = 0;
+long bestCompletionTime = 0;
+time_t gameStartTime = 0;
 
 // For printing
 char lastCommand[100];

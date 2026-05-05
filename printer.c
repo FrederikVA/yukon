@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "variables.h"
 #include "printer.h"
+#include "timer.h"
 
 void printToTerminal() {
     //printf("\033[H\033[J");
@@ -80,6 +81,12 @@ void printLastCommand() {
 
 void printMessage() {
     printf("Message: %s\n", message);
+    if (currentPhase == PLAY) {
+        printf("Time: %ld seconds\n", getGameElapsed());
+        if (bestCompletionTime > 0) {
+            printf("Best: %ld seconds\n", bestCompletionTime);
+        }
+    }
 }
 
 void printInputPrompt() {
@@ -103,6 +110,8 @@ void printHelp() {
     printf("P — Play (start game)\n");
     printf("Q — Quit playing (return to startup)\n");
     printf("QQ — Quit program\n\n");
-    printf("SD - Show deck files\n");
+    printf("U — Undo last move\n");
+    printf("R — Redo last undone move\n");
+    printf("S <filename> — Save game state\n");
+    printf("L <filename> — Load game state\n");
 }
-

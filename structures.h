@@ -17,4 +17,12 @@ typedef enum {
     PLAY
 } GamePhase;
 
+typedef struct {
+    int active;
+    Card *startCard;
+    int fromColumnIndex;
+    int fromFoundation;  
+    int mouseX, mouseY;
+} DragState;
+
 #endif

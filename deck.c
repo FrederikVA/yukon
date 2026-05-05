@@ -7,7 +7,18 @@
 const char ranks[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
 const char suits[] = {'C', 'D', 'H', 'S'};
 
+void clearDeck() {
+    Card *current = deck;
+    while (current != NULL) {
+        Card *next = current->next;
+        free(current);
+        current = next;
+    }
+    deck = NULL;
+}
+
 void createDefaultDeck() {
+    clearDeck();
     Card *last = NULL;
 
     for (int s = 0; s < 4; s++) { // For each suit
