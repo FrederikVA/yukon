@@ -14,5 +14,6 @@ void startDragFromColumn(Card *card, int columnIndex);
 void stopDrag(int x, int y);
 void drawDraggedCards(SDL_Renderer *r, TTF_Font *font, CardTextures *t, int x, int y);
 void attemptDropAt(int x, int y);  
+void cancelActiveDrag(void);
 
 #endif

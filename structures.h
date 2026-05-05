@@ -22,6 +22,7 @@ typedef struct {
     Card *startCard;
     int fromColumnIndex;
     int fromFoundation;  
+    int suppressNextMouseUp;
     int mouseX, mouseY;
 } DragState;
 

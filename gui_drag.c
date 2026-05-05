@@ -17,6 +17,7 @@ void startDragFromPile(Card *card, int pileIndex, int isFoundation) {
     dragging.startCard = card;
     dragging.fromColumnIndex = pileIndex;
     dragging.fromFoundation = isFoundation;  
+    dragging.suppressNextMouseUp = 0;
     dragging.mouseX = 0;
     dragging.mouseY = 0;
 }
@@ -27,6 +28,7 @@ void startDragFromColumn(Card *card, int columnIndex) {
     dragging.startCard = card;
     dragging.fromColumnIndex = columnIndex;
     dragging.fromFoundation = 0;  
+    dragging.suppressNextMouseUp = 0;
     dragging.mouseX = 0;
     dragging.mouseY = 0;
 }
@@ -44,6 +46,10 @@ void drawDraggedCards(SDL_Renderer *r, TTF_Font *font, CardTextures *t, int x, i
 }
 
 void stopDrag(int x, int y) {
+    if (dragging.suppressNextMouseUp) {
+        dragging.suppressNextMouseUp = 0;
+        return;
+    }
     if (!dragging.active || !dragging.startCard) return;
 
     attemptDropAt(x, y);
@@ -53,12 +59,19 @@ void stopDrag(int x, int y) {
     dragging.fromColumnIndex = -1;
 }
 
+void cancelActiveDrag(void) {
+    dragging.active = 0;
+    dragging.startCard = NULL;
+    dragging.fromColumnIndex = -1;
+    dragging.suppressNextMouseUp = 1;
+}
+
 void attemptDropAt(int x, int y) {
     int targetCol = -1;
     int targetFoundation = -1;
 
     // Check columns (centered layout)
-    int startX = (1000 - (7 * (CARD_WIDTH + 10) - 10)) / 2;
+    int startX = 120;
     int startY = 40;
 
     for (int i = 0; i < 7; i++) {
@@ -92,7 +105,7 @@ void attemptDropAt(int x, int y) {
     // 2. Check foundations (right side)
     if (targetCol == -1) {
         for (int i = 0; i < 4; i++) {
-            int fx = 920;
+            int fx = 760;
             int fy = 40 + i * (CARD_HEIGHT + 20);
             SDL_Rect rect = {fx, fy, CARD_WIDTH, CARD_HEIGHT};
             if (SDL_PointInRect(&(SDL_Point){x, y}, &rect)) {
@@ -106,6 +119,15 @@ void attemptDropAt(int x, int y) {
     if (targetCol >= 0 || targetFoundation >= 0) {
         char cmd[20];
         char src[5], dst[5];
+
+        if (!dragging.fromFoundation && targetCol == dragging.fromColumnIndex) {
+            strcpy(message, "Move cancelled.");
+            return;
+        }
+        if (dragging.fromFoundation && targetFoundation == dragging.fromColumnIndex) {
+            strcpy(message, "Move cancelled.");
+            return;
+        }
 
         if (dragging.fromFoundation) {
             sprintf(src, "F%d", dragging.fromColumnIndex + 1);
@@ -123,7 +145,6 @@ void attemptDropAt(int x, int y) {
 
         snprintf(cmd, sizeof(cmd), "%s->%s", src, dst);
 
-        printf("Trying move: %s\n", cmd);
         if (validateMoveInput(cmd) && validateMove()) {
             executeMove();
             strcpy(message, "Drag-drop move executed!");

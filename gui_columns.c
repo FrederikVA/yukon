@@ -9,7 +9,7 @@
 #define COLUMN_GAP_X 10
 
 Card *drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures, int mouseX, int mouseY, int centered, int *outColumnIndex) {
-    int startX = centered ? (1000 - (7 * (CARD_WIDTH + COLUMN_GAP_X) - COLUMN_GAP_X)) / 2 : 330;
+    int startX = centered ? 120 : 40;
     int startY = centered ? 40 : 120;
 
     Card *hoveredCard = NULL;
@@ -54,7 +54,7 @@ Card *drawColumns(SDL_Renderer *renderer, TTF_Font *font, CardTextures *textures
 
     if (centered) {
         for (int f = 0; f < 4; f++) {
-            int x = 920;
+            int x = 760;
             int y = 40 + f * (CARD_HEIGHT + 20);
             
             Card *current = foundations[f].top;

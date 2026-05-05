@@ -10,18 +10,23 @@
 #include "variables.h"
 #include "gui_drag.h"
 #include "move.h"
+#include "timer.h"
 
 #define CARD_WIDTH 60
 #define CARD_HEIGHT 90
+#define SCREEN_WIDTH 1200
+#define SCREEN_HEIGHT 700
 
 void runGUI() {
+    loadBestCompletionTime();
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0 || TTF_Init() != 0) {
         SDL_Log("Init Error: %s\n", SDL_GetError());
         return;
     }
 
     SDL_Window *win = SDL_CreateWindow("Yukon GUI",
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1000, 600, SDL_WINDOW_SHOWN);
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     SDL_Renderer *renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
     if (!win || !renderer) {
         SDL_Log("Window/Renderer Error: %s\n", SDL_GetError());
@@ -59,10 +64,13 @@ void runGUI() {
                 running = 0;
             } else if (e.type == SDL_MOUSEBUTTONDOWN) {
                 if (currentPhase == STARTUP) {
-                    handleButtonClick(e.button.x, e.button.y);
+                    if (!handleSavedGameClick(e.button.x, e.button.y)) {
+                        handleButtonClick(e.button.x, e.button.y);
+                    }
                 } else if (currentPhase == PLAY && e.button.button == SDL_BUTTON_LEFT) {
-                    // Check if the exit button was clicked
-                    handleExitButtonClick(e.button.x, e.button.y);
+                    if (handlePlayControlClick(e.button.x, e.button.y)) {
+                        continue;
+                    }
                 
                     int colIndex = -1;
                     Card *hoveredCard = drawColumns(renderer, font, &cardTextures, mouseX, mouseY, currentPhase == PLAY, &colIndex);
@@ -73,14 +81,17 @@ void runGUI() {
                         if (!curr) continue;
                         while (curr->next) curr = curr->next;  // last card
 
-                        SDL_Rect rect = {920, 40 + i * (CARD_HEIGHT + 20), CARD_WIDTH, CARD_HEIGHT};
+                        SDL_Rect rect = {760, 40 + i * (CARD_HEIGHT + 20), CARD_WIDTH, CARD_HEIGHT};
                         if (SDL_PointInRect(&(SDL_Point){e.button.x, e.button.y}, &rect)) {
                             startDragFromPile(curr, i, 1);  // from foundation
+                            dragging.mouseX = e.button.x;
+                            dragging.mouseY = e.button.y;
                             break;
                         }
                     }
 
                     if (e.button.clicks == 2 && hoveredCard) {
+                        int movedToFoundation = 0;
                         // Make sure it's the last card in its column
                         Card *curr = columns[colIndex].top;
                         while (curr && curr->next) {
@@ -96,14 +107,21 @@ void runGUI() {
                                 if (validateMoveInput(cmd) && validateMove()) {
                                     executeMove();
                                     strcpy(message, "Card moved to foundation!");
+                                    cancelActiveDrag();
+                                    movedToFoundation = 1;
                                     break;
                                 }
                             }
+                        }
+                        if (movedToFoundation) {
+                            continue;
                         }
                     }                                      
 
                     if (hoveredCard) {
                         startDragFromColumn(hoveredCard, colIndex);
+                        dragging.mouseX = e.button.x;
+                        dragging.mouseY = e.button.y;
                     }
                 }                
             } else if (e.type == SDL_MOUSEBUTTONUP) {
@@ -123,15 +141,16 @@ void runGUI() {
         SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
         SDL_RenderClear(renderer);
 
-        // Only draw menu buttons in STARTUP mode
-        if (currentPhase == STARTUP) {
-            drawButtons(renderer, font, 300, 600);
-        } else if (currentPhase == PLAY) {
-            drawExitGameButton(renderer, font, 1000, 600);
-        }
-
         int colIndex;
         drawColumns(renderer, font, &cardTextures, mouseX, mouseY, currentPhase == PLAY, &colIndex);
+
+        // Draw controls after cards so UI stays above the tableau.
+        if (currentPhase == STARTUP) {
+            drawButtons(renderer, font, SCREEN_WIDTH, SCREEN_HEIGHT);
+            drawStartupSavedGames(renderer, font, SCREEN_WIDTH, SCREEN_HEIGHT);
+        } else if (currentPhase == PLAY) {
+            drawPlayControls(renderer, font, SCREEN_WIDTH, SCREEN_HEIGHT);
+        }
 
         if (currentPhase == PLAY && dragging.active) {
             drawDraggedCards(renderer, font, &cardTextures, dragging.mouseX, dragging.mouseY);

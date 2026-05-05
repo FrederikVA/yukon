@@ -25,6 +25,7 @@ TARGET = yukon
 SRC = main.c printer.c deck.c variables.c fileHandler.c stateHandler.c shuffler.c game.c move.c history.c timer.c gui.c gui_buttons.c gui_columns.c gui_cards.c card_images.c gui_drag.c
 
 OBJ = $(SRC:.c=.o)
+BUILD_ARTIFACTS = $(TARGET) $(OBJ)
 
 $(TARGET): $(OBJ)
 	$(CC) -o $(TARGET) $(OBJ) $(LDFLAGS)
@@ -33,4 +34,5 @@ $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) *.o
+	rm -f $(BUILD_ARTIFACTS)
+	@echo "Preserved saved decks, saved games, and best_time.txt."
