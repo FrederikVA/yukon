@@ -5,6 +5,7 @@
 #include "variables.h"
 
 
+// Counts the deck linked list; shuffle commands require a complete 52-card deck.
 int countDeck() {
     int count = 0;
     Card *current = deck;
@@ -15,6 +16,7 @@ int countDeck() {
     return count;
 }
 
+// Implements SR: removes cards from the old linked list and inserts each at a random position in a new list.
 void randomShuffle() {
     if (countDeck() != 52) {
         printf("Error: Deck must contain exactly 52 cards to shuffle.\n");
@@ -47,6 +49,7 @@ void randomShuffle() {
     deck = shuffled;
 }
 
+// Implements SI <split>: splits the linked list in two and interleaves nodes from each pile.
 void riffleShuffle(int split) {
     if (countDeck() != 52) {
         printf("Error: Deck must contain exactly 52 cards to shuffle.\n");
@@ -99,4 +102,3 @@ void printDeckDebug() {
     }
     printf("\nTotal cards in deck: %d\n", count);
 }
-

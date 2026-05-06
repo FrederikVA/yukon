@@ -7,6 +7,7 @@
 #include "deck.h"
 #include "fileHandler.h"
 
+// Appends dealt cards to a tableau column while keeping that column as a linked list.
 static void appendCardToColumn(int col, Card *card) {
     if (columns[col].top == NULL) {
         columns[col].top = card;
@@ -20,6 +21,7 @@ static void appendCardToColumn(int col, Card *card) {
     tail->next = card;
 }
 
+// Implements P: deals the whole deck row-wise into Yukon column sizes 1, 6, 7, 8, 9, 10, 11.
 void initGame() {
     clearColumns();
     clearFoundations();

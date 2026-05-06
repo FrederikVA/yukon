@@ -60,6 +60,7 @@ int countLinesInFile(const char *filename) {
     return count;
 }
 
+// Appends to a pile represented as a singly linked list while preserving card order.
 static void appendCard(Pile *pile, Card *card) {
     if (pile->top == NULL) {
         pile->top = card;
@@ -73,6 +74,7 @@ static void appendCard(Pile *pile, Card *card) {
     tail->next = card;
 }
 
+// Copies a card node so deck, columns, foundations, and saved states do not share mutable list nodes.
 static Card *copyCard(Card *source) {
     Card *copy = (Card *)malloc(sizeof(Card));
     if (!copy) {
@@ -97,6 +99,7 @@ static void setCurrentFileName(const char *filename) {
     }
 }
 
+// Game-state extension: saved games are kept under saves/ using relative paths for delivery portability.
 static void buildStatePath(char *path, int pathSize, const char *filename) {
     int len = (int)strlen(filename);
 
@@ -146,6 +149,7 @@ static void writePile(FILE *f, Pile *pile) {
     }
 }
 
+// Reads one saved pile back as a linked list, including each card's face-up/face-down state.
 static int readPile(FILE *f, Pile *pile) {
     int count = 0;
     if (fscanf(f, "%d", &count) != 1 || count < 0 || count > 52) {
@@ -177,6 +181,7 @@ static int readPile(FILE *f, Pile *pile) {
     return 1;
 }
 
+// Loads a validated deck file into the deck linked list with every card initially face down.
 static int loadDeckFromFile(const char *filename) {
     FILE *f = fopen(filename, "r");
     if (!f) {
@@ -214,6 +219,7 @@ static int loadDeckFromFile(const char *filename) {
     return 1;
 }
 
+// STARTUP display helper: lays the deck into 7 columns row-wise, still using linked-list piles.
 void loadBoardFromFile(const char *filename) {
     FILE *f = fopen(filename, "r");
     if (!f) {
@@ -241,6 +247,7 @@ void loadBoardFromFile(const char *filename) {
     fclose(f);
 }
 
+// Implements LD: load a named deck from decks/ or create the default ordered deck when no name is given.
 int loadDeck(const char *filename) {
     clearColumns();
     clearFoundations();
@@ -279,6 +286,7 @@ int loadDeck(const char *filename) {
     return 1;
 }
 
+// Implements SW by turning the startup column cards face up without changing deck order.
 void showDeck() {
     // Turn all cards face up
     for (int i = 0; i < 7; i++) {
@@ -309,6 +317,7 @@ void showDeckFiles() {
     closedir(dp);
 }
 
+// Implements SD: writes the current 52-card deck to decks/ as one rank+suit code per line.
 int saveDeckToFile(const char *filename) {
     if (deck == NULL) {
         printf("No deck to save.\n");
@@ -343,6 +352,7 @@ int saveDeckToFile(const char *filename) {
     return 1;
 }
 
+// Extension command S: saves the full game state, not just the deck, so play can resume exactly.
 int saveGameState(const char *filename) {
     char path[200];
     buildStatePath(path, sizeof(path), filename);
@@ -383,6 +393,7 @@ int saveGameState(const char *filename) {
     return 1;
 }
 
+// Extension command L: restores deck, columns, foundations, timer, and phase from a saved state file.
 int loadGameState(const char *filename) {
     char path[200];
     char marker[20];
@@ -498,6 +509,7 @@ int loadGameState(const char *filename) {
     return 1;
 }
 
+// Requirement for LD <filename>: reject invalid card codes, duplicates, and decks not containing 52 cards.
 int validateDeckFile(const char *filename) {
     const char *validRanks = "A23456789TJQK";
     const char *validSuits = "CDHS"; // Clubs, Diamonds, Hearts, Spades
@@ -562,6 +574,7 @@ int validateDeckFile(const char *filename) {
     return 1; // OK
 }
 
+// Frees all tableau columns, each stored as a singly linked list of cards.
 void clearColumns() {
     for (int i = 0; i < 7; i++) {
         Card *current = columns[i].top;
@@ -574,6 +587,7 @@ void clearColumns() {
     }
 }
 
+// Frees all four foundation piles, each stored as a singly linked list of cards.
 void clearFoundations() {
     for (int i = 0; i < 4; i++) {
         Card *current = foundations[i].top;
@@ -586,6 +600,7 @@ void clearFoundations() {
     }
 }
 
+// Rebuilds the startup view from the current deck order after LD, SI, or SR.
 void reloadColumnsFromDeck() {
     clearColumns();
 

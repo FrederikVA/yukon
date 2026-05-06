@@ -7,6 +7,7 @@
 const char ranks[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
 const char suits[] = {'C', 'D', 'H', 'S'};
 
+// Frees the singly linked list used for the current deck before loading or creating another deck.
 void clearDeck() {
     Card *current = deck;
     while (current != NULL) {
@@ -17,6 +18,7 @@ void clearDeck() {
     deck = NULL;
 }
 
+// Implements LD without a filename: creates the required ordered deck C, D, H, S from Ace to King.
 void createDefaultDeck() {
     clearDeck();
     Card *last = NULL;

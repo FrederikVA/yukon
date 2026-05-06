@@ -154,6 +154,7 @@ static void drawStatusMessage(SDL_Renderer *renderer, TTF_Font *font, int screen
     drawText(renderer, font, secondLine, 150, screenHeight - 58, white);
 }
 
+// GUI saved-game list: only shows YUKON_STATE files from saves/, separate from deck files.
 static void refreshSavedStateList(void) {
     struct dirent *entry;
     DIR *dp = opendir("saves");
@@ -197,6 +198,7 @@ static void addSortedName(char names[SAVE_LIST_MAX][100], int *count, const char
     (*count)++;
 }
 
+// GUI saved-deck list: shows decks/*.txt exactly as test inputs, separate from mutable saved games.
 static void refreshSavedDeckList(void) {
     struct dirent *entry;
     DIR *dp = opendir("decks");
@@ -212,6 +214,7 @@ static void refreshSavedDeckList(void) {
     closedir(dp);
 }
 
+// Prevents GUI SD from overwriting loaded test decks after shuffle by generating a unique deck filename.
 static void buildUniqueGuiDeckSaveCommand(char *command, int commandSize) {
     char filename[80];
     char path[120];
@@ -465,6 +468,7 @@ void drawStartupSavedGames(SDL_Renderer *renderer, TTF_Font *font, int screenWid
     drawStatusMessage(renderer, font, screenHeight);
 }
 
+// Saves GUI game states under saves/ with unique names so they appear in SAVED GAMES.
 static void buildUniqueGuiSaveCommand(char *command, int commandSize) {
     char filename[80];
     long now = (long)time(NULL);
@@ -489,6 +493,7 @@ static void buildUniqueGuiSaveCommand(char *command, int commandSize) {
     snprintf(command, commandSize, "S gui_save_%ld_fallback.txt", now);
 }
 
+// Dispatches clicks from the two startup lists: decks use LD, saved game states use L.
 int handleSavedGameClick(int x, int y) {
     SDL_Point point = {x, y};
     char command[120];

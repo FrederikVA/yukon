@@ -4,6 +4,7 @@
 #include "printer.h"
 #include "timer.h"
 
+// Terminal mode renderer: keeps the required Last Command, Message, and INPUT prompt around the board.
 void printToTerminal() {
     //printf("\033[H\033[J");
     printBoard();
@@ -11,6 +12,7 @@ void printToTerminal() {
     printMessage();
 }
 
+// Prints the linked-list tableau and foundations in the text layout required by the assignment.
 void printBoard() {
     // 1. Print header
     printf("%s", WALL);

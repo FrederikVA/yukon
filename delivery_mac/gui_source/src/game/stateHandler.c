@@ -11,6 +11,7 @@
 #include "history.h"
 #include "timer.h"
 
+// Used by SI <split> to reject non-numeric or missing split values before shuffling.
 static int parsePositiveInt(const char *text, int *value) {
     int result = 0;
 
@@ -29,6 +30,7 @@ static int parsePositiveInt(const char *text, int *value) {
     return 1;
 }
 
+// Central command dispatcher: enforces STARTUP vs PLAY phase rules from the project specification.
 void handleCommand(const char *input) {
     strcpy(lastCommand, input);
 

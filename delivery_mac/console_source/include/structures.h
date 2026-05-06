@@ -5,6 +5,7 @@ typedef struct Card {
     char rank;     // 'A', '2', ..., 'T', 'J', 'Q', 'K'
     char suit;     // 'C', 'D', 'H', 'S'
     int face_up;   // 1 if face up, 0 if hidden
+    // Project requirement: cards in decks, columns, and foundations are stored as singly linked lists.
     struct Card *next;
 } Card;
 

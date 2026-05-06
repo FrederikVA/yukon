@@ -10,6 +10,7 @@ DragState dragging = {0};
 #define CARD_WIDTH 60
 #define CARD_HEIGHT 90
 
+// Begins GUI dragging while remembering whether the linked-list source is a column or foundation.
 void startDragFromPile(Card *card, int pileIndex, int isFoundation) {
     if (!card || !card->face_up) return;
 
@@ -66,6 +67,7 @@ void cancelActiveDrag(void) {
     dragging.suppressNextMouseUp = 1;
 }
 
+// Converts drag/drop into the same textual move command used by terminal mode, then validates it.
 void attemptDropAt(int x, int y) {
     int targetCol = -1;
     int targetFoundation = -1;

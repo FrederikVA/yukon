@@ -17,6 +17,7 @@
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 700
 
+// GUI double-click helper: chooses the legal foundation first instead of trial-validating F1-F4.
 static int findFoundationForCard(Card *card) {
     if (!card) return -1;
 
@@ -46,6 +47,7 @@ static int findFoundationForCard(Card *card) {
     return -1;
 }
 
+// GUI frontend in C/SDL: reuses the same backend command and move functions as terminal mode.
 void runGUI() {
     loadBestCompletionTime();
 

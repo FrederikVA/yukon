@@ -9,12 +9,14 @@
 
 MoveState currentMove;  // actual global instance
 
+// Clears the parsed move before reading another <from>-><to> command.
 void resetMoveState() {
     strcpy(currentMove.cardToMove, "");
     strcpy(currentMove.fromColumnOrField, "");
     strcpy(currentMove.toColumnOrField, "");
 }
 
+// Supports moves like C6->C4 by resolving the implicit card to the bottom-most face-up card.
 void inferCardToMoveFromColumn() {
     if (currentMove.cardToMove[0] != '\0') return;
 
@@ -37,6 +39,7 @@ void inferCardToMoveFromColumn() {
     }
 }
 
+// Parses the required move grammar: C6:4H->C4, C6->F1, or F3->C6.
 int validateMoveInput(const char *input) {
     resetMoveState();
 
@@ -116,6 +119,7 @@ int validateMoveInput(const char *input) {
 }
 
 // Helper to get rank index (A=0, 2=1, ..., K=12)
+// Converts rank characters to ordered values so move rules can compare rank differences.
 int getRankIndex(char rank) {
     const char *ranks = "A23456789TJQK";
     const char *ptr = strchr(ranks, rank);
@@ -123,6 +127,7 @@ int getRankIndex(char rank) {
 }
 
 // Helper: This version allows for same colour, just have to be a different suit!
+// Yukon column rule from the PDF: moved card must be a different suit, not necessarily alternating color.
 int isDifferentSuit(char suitA, char suitB) {
     return suitA != suitB;
 }
@@ -139,6 +144,7 @@ Card* findCardInColumn(Pile *pile, const char *cardCode) {
     return NULL;
 }
 
+// Foundation rule: only the bottom card of a tableau column can be moved to a foundation.
 static int isBottomCard(Pile *pile, Card *card) {
     Card *current = pile->top;
     if (!current || !card) return 0;
@@ -149,6 +155,7 @@ static int isBottomCard(Pile *pile, Card *card) {
     return current == card;
 }
 
+// Validates that the source card exists and is face up before any board mutation happens.
 int validateFromMove() {
     inferCardToMoveFromColumn();
     int fromCol = currentMove.fromColumnOrField[1] - '1';
@@ -178,6 +185,7 @@ int validateFromMove() {
     return 1;
 }
 
+// Validates destination rules for both tableau columns and foundations exactly before executing a move.
 int validateToMove() {
     inferCardToMoveFromColumn();
 
@@ -240,12 +248,14 @@ int validateToMove() {
     }
 }
 
+// Combines source and destination validation so invalid moves never alter the linked-list board state.
 int validateMove() {
     if (!validateFromMove()) return 0;
     if (!validateToMove()) return 0;
     return 1;
 }
 
+// Win condition: all four foundations must end at Kings, meaning every suit was built Ace through King.
 int isGameWon(void) {
     for (int i = 0; i < 4; i++) {
         Card *current = foundations[i].top;
@@ -263,6 +273,7 @@ int isGameWon(void) {
 // _____ ACTUAL MOVE LOGIC _____ //
 
 
+// Executes a validated move by relinking nodes, preserving any card sequence below the moved card.
 void executeMove() {
     inferCardToMoveFromColumn();
     recordUndoState();
@@ -339,6 +350,7 @@ void executeMove() {
     winCondition();
 }
 
+// Yukon rule: when a move reveals a face-down card, flip the newly exposed bottom card face up.
 void postMoveUpdate(Pile *source) {
     // After moving, flip the last card face up if needed
     if (!source->top) return; // Nothing left
@@ -354,6 +366,7 @@ void postMoveUpdate(Pile *source) {
     }
 }
 
+// After foundation moves, update the timer/best-time state and show the winning message when complete.
 void winCondition() {
     if (currentMove.toColumnOrField[0] == 'F' && currentMove.cardToMove[0] == 'K') {
         if (isGameWon()) {

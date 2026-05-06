@@ -14,6 +14,7 @@ typedef struct HistoryNode {
 static HistoryNode *undoStack = NULL;
 static HistoryNode *redoStack = NULL;
 
+// Undo/redo needs deep copies because piles are mutable singly linked lists.
 static Card *copyCardList(Card *source) {
     Card *copyHead = NULL;
     Card *copyTail = NULL;
@@ -70,6 +71,7 @@ static void clearStack(HistoryNode **stack) {
     }
 }
 
+// Stores a full board snapshot so undo/redo restores columns, foundations, deck, phase, and timer together.
 static HistoryNode *createSnapshot(void) {
     HistoryNode *node = (HistoryNode *)malloc(sizeof(HistoryNode));
     if (!node) {
@@ -113,6 +115,7 @@ static void restoreSnapshot(HistoryNode *node) {
     }
 }
 
+// Called immediately before executing a valid move so U can return to the previous board state.
 void recordUndoState(void) {
     if (currentPhase != PLAY) {
         return;
@@ -122,6 +125,7 @@ void recordUndoState(void) {
     clearStack(&redoStack);
 }
 
+// Implements U by moving the current snapshot to the redo stack and restoring the previous snapshot.
 int undoMove(void) {
     HistoryNode *previous = popSnapshot(&undoStack);
     if (!previous) {
@@ -134,6 +138,7 @@ int undoMove(void) {
     return 1;
 }
 
+// Implements R only after undo by restoring the latest snapshot from the redo stack.
 int redoMove(void) {
     HistoryNode *next = popSnapshot(&redoStack);
     if (!next) {
