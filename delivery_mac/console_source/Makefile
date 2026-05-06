@@ -6,6 +6,7 @@ SDL2_TTF_PREFIX ?= $(BREW_PREFIX)/opt/sdl2_ttf
 SDL2_IMAGE_PREFIX ?= $(BREW_PREFIX)/opt/sdl2_image
 
 CFLAGS = -Wall -Wextra -g \
+  -Iinclude \
   -I$(SDL2_PREFIX)/include/SDL2 \
   -I$(SDL2_TTF_PREFIX)/include/SDL2 \
   -I$(SDL2_IMAGE_PREFIX)/include/SDL2
@@ -22,7 +23,24 @@ LDFLAGS = \
 # LDFLAGS += -L/opt/homebrew/opt/openblas/lib -lopenblas
 
 TARGET = yukon
-SRC = main.c printer.c deck.c variables.c fileHandler.c stateHandler.c shuffler.c game.c move.c history.c timer.c gui.c gui_buttons.c gui_columns.c gui_cards.c card_images.c gui_drag.c
+SRC = \
+  src/main.c \
+  src/ui/printer.c \
+  src/game/deck.c \
+  src/game/fileHandler.c \
+  src/game/game.c \
+  src/game/history.c \
+  src/game/move.c \
+  src/game/shuffler.c \
+  src/game/stateHandler.c \
+  src/game/timer.c \
+  src/game/variables.c \
+  src/gui/card_images.c \
+  src/gui/gui.c \
+  src/gui/gui_buttons.c \
+  src/gui/gui_cards.c \
+  src/gui/gui_columns.c \
+  src/gui/gui_drag.c
 
 OBJ = $(SRC:.c=.o)
 BUILD_ARTIFACTS = $(TARGET) $(OBJ)
@@ -35,4 +53,4 @@ $(TARGET): $(OBJ)
 
 clean:
 	rm -f $(BUILD_ARTIFACTS)
-	@echo "Preserved saved decks, saved games, and best_time.txt."
+	@echo "Preserved assets, decks, saves, and best_time.txt."

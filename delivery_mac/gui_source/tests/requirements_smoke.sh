@@ -30,7 +30,7 @@ run_game() {
 }
 
 TMP_DIR=$(mktemp -d)
-trap 'rm -rf "$TMP_DIR"; rm -f decks/codextest.txt codexstate.txt best_time.txt' EXIT
+trap 'rm -rf "$TMP_DIR"; rm -f decks/codextest.txt saves/codexstate.txt codexstate.txt best_time.txt' EXIT
 
 make >/dev/null
 
@@ -93,11 +93,11 @@ assert_contains "$TMP_DIR/undo_redo.txt" "| AC | [] | [] | [] | [] | [] | [] |  
 assert_contains "$TMP_DIR/undo_redo.txt" "LAST Command: R" "redo command tracked"
 
 run_game "LD\nP\nC1->F1\nS codexstate\nQ\nL codexstate\nQ\nQQ\n" "$TMP_DIR/save_load_state.txt"
-assert_contains "$TMP_DIR/save_load_state.txt" "Game state saved to file: codexstate.txt" "S should save full game state"
-assert_contains "$TMP_DIR/save_load_state.txt" "Game state loaded from file: codexstate.txt" "L should load full game state"
+assert_contains "$TMP_DIR/save_load_state.txt" "Game state saved to file: saves/codexstate.txt" "S should save full game state"
+assert_contains "$TMP_DIR/save_load_state.txt" "Game state loaded from file: saves/codexstate.txt" "L should load full game state"
 assert_contains "$TMP_DIR/save_load_state.txt" "|    | [] | [] | [] | [] | [] | [] |  F1 [ AC ]" "loaded state should restore foundation"
-if [ ! -f codexstate.txt ]; then
-    fail "S did not create codexstate.txt"
+if [ ! -f saves/codexstate.txt ]; then
+    fail "S did not create saves/codexstate.txt"
 fi
 
 printf "LD\nP\n" | ./yukon > "$TMP_DIR/eof_play.txt" &

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "structures.h"
 #include "variables.h"
 #include "shuffler.h"
@@ -100,10 +101,30 @@ static void buildStatePath(char *path, int pathSize, const char *filename) {
     int len = (int)strlen(filename);
 
     if (len >= 4 && strcmp(filename + len - 4, ".txt") == 0) {
+        snprintf(path, pathSize, "saves/%s", filename);
+    } else {
+        snprintf(path, pathSize, "saves/%s.txt", filename);
+    }
+}
+
+static void buildLegacyStatePath(char *path, int pathSize, const char *filename) {
+    int len = (int)strlen(filename);
+
+    if (len >= 4 && strcmp(filename + len - 4, ".txt") == 0) {
         snprintf(path, pathSize, "%s", filename);
     } else {
         snprintf(path, pathSize, "%s.txt", filename);
     }
+}
+
+static int ensureSaveDirectory(void) {
+    struct stat st;
+
+    if (stat("saves", &st) == 0) {
+        return S_ISDIR(st.st_mode);
+    }
+
+    return mkdir("saves", 0755) == 0;
 }
 
 static int countPileCards(Pile *pile) {
@@ -326,6 +347,11 @@ int saveGameState(const char *filename) {
     char path[200];
     buildStatePath(path, sizeof(path), filename);
 
+    if (!ensureSaveDirectory()) {
+        printf("Failed to create saves directory.\n");
+        return 0;
+    }
+
     FILE *f = fopen(path, "w");
     if (!f) {
         printf("Failed to open file for writing: %s\n", path);
@@ -369,8 +395,14 @@ int loadGameState(const char *filename) {
 
     FILE *f = fopen(path, "r");
     if (!f) {
-        printf("Error: Game state file does not exist: %s\n", path);
-        return 0;
+        char legacyPath[200];
+        buildLegacyStatePath(legacyPath, sizeof(legacyPath), filename);
+        f = fopen(legacyPath, "r");
+        if (!f) {
+            printf("Error: Game state file does not exist: %s\n", path);
+            return 0;
+        }
+        snprintf(path, sizeof(path), "%s", legacyPath);
     }
 
     if (fscanf(f, "%19s %d", marker, &version) != 2 ||

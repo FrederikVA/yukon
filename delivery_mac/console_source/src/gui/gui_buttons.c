@@ -156,15 +156,16 @@ static void drawStatusMessage(SDL_Renderer *renderer, TTF_Font *font, int screen
 
 static void refreshSavedStateList(void) {
     struct dirent *entry;
-    DIR *dp = opendir(".");
+    DIR *dp = opendir("saves");
     savedStateCount = 0;
 
     if (!dp) return;
     while ((entry = readdir(dp)) != NULL && savedStateCount < SAVE_LIST_MAX) {
         int len = (int)strlen(entry->d_name);
-        if (len > 4 && strcmp(entry->d_name + len - 4, ".txt") == 0 &&
-            strcmp(entry->d_name, "best_time.txt") != 0) {
-            FILE *f = fopen(entry->d_name, "r");
+        if (len > 4 && strcmp(entry->d_name + len - 4, ".txt") == 0) {
+            char path[200];
+            snprintf(path, sizeof(path), "saves/%s", entry->d_name);
+            FILE *f = fopen(path, "r");
             char marker[20] = "";
             int version = 0;
             int isStateFile = f && fscanf(f, "%19s %d", marker, &version) == 2 &&
@@ -475,7 +476,9 @@ static void buildUniqueGuiSaveCommand(char *command, int commandSize) {
             snprintf(filename, sizeof(filename), "gui_save_%ld_%d.txt", now, i);
         }
 
-        FILE *f = fopen(filename, "r");
+        char path[120];
+        snprintf(path, sizeof(path), "saves/%s", filename);
+        FILE *f = fopen(path, "r");
         if (!f) {
             snprintf(command, commandSize, "S %s", filename);
             return;

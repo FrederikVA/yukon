@@ -24,6 +24,11 @@ brew install sdl2 sdl2_ttf sdl2_image
 ./yukon --gui
 ```
 
-## Important
+## Included Folders
 
-Run the executable from this folder so the relative paths to `assets`, `decks`, and `best_time.txt` work correctly.
+- `assets/`: GUI images
+- `decks/`: deck files and test decks
+- `saves/`: saved game states
+- `best_time.txt`: best completion time
+
+Run the executable from this folder so all relative paths work correctly.
