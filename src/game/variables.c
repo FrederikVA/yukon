@@ -3,7 +3,7 @@
 #include "structures.h"
 #include "variables.h"
 
-// Global piles
+// Global piles (only capslog names for constants?)
 Pile columns[7];
 Pile foundations[4];
 
