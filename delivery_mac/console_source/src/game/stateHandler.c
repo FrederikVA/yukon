@@ -81,7 +81,7 @@ void handleCommand(const char *input) {
             } else {
                 randomShuffle();
                 reloadColumnsFromDeck();
-                showDeck();
+                //showDeck();
                 strcpy(message, "OK");
             }
         } else if (strncmp(input, "SI", 2) == 0) {
@@ -103,7 +103,7 @@ void handleCommand(const char *input) {
                 } else {
                     riffleShuffle(split);
                     reloadColumnsFromDeck();
-                    showDeck();
+                    //showDeck();
                     strcpy(message, "OK");
                 }
             }

@@ -29,6 +29,13 @@ run_game() {
     printf "%b" "$input" | ./yukon > "$output"
 }
 
+run_game_in_dir() {
+    input=$1
+    output=$2
+    dir=$3
+    (cd "$dir" && printf "%b" "$input" | "$ROOT_DIR/yukon" > "$output")
+}
+
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"; rm -f decks/codextest.txt saves/codexstate.txt codexstate.txt best_time.txt' EXIT
 
@@ -91,6 +98,14 @@ assert_contains "$TMP_DIR/save_deck.txt" "Deck saved to file: decks/codextest.tx
 assert_contains "$TMP_DIR/save_deck.txt" "Message: OK" "SD should report OK"
 if [ ! -f decks/codextest.txt ]; then
     fail "SD did not create decks/codextest.txt"
+fi
+
+mkdir "$TMP_DIR/sd_no_args"
+run_game_in_dir "LD\nSD\nQQ\n" "$TMP_DIR/save_default_deck.txt" "$TMP_DIR/sd_no_args"
+assert_contains "$TMP_DIR/save_default_deck.txt" "Deck saved to file: decks/cards.txt" "SD with no args should save the default deck path"
+assert_contains "$TMP_DIR/save_default_deck.txt" "Message: OK" "SD with no args should report OK"
+if [ ! -f "$TMP_DIR/sd_no_args/decks/cards.txt" ]; then
+    fail "SD with no args did not create decks/cards.txt"
 fi
 
 run_game "LD\nP\nC1->F1\nU\nR\nQ\nQQ\n" "$TMP_DIR/undo_redo.txt"
