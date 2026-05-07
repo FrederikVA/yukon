@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "macOS",
+            "includePath": [
+                "${workspaceFolder}/include",
+                "/opt/homebrew/opt/sdl2/include/SDL2",
+                "/opt/homebrew/opt/sdl2_ttf/include/SDL2",
+                "/opt/homebrew/opt/sdl2_image/include/SDL2",
+                "/opt/homebrew/include"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "intelliSenseMode": "macos-clang-arm64"
+        }
+    ],
+    "version": 4
+}
