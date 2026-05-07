@@ -54,6 +54,14 @@ run_game "LD dup\nQQ\n" "$TMP_DIR/duplicate_deck.txt"
 assert_contains "$TMP_DIR/duplicate_deck.txt" "Duplicate card detected: 'AH'" "duplicate deck must be rejected"
 assert_contains "$TMP_DIR/duplicate_deck.txt" "Message: Error: Could not load deck: dup" "duplicate LD message"
 
+run_game "LD cards51\nQQ\n" "$TMP_DIR/missing_card_deck.txt"
+assert_contains "$TMP_DIR/missing_card_deck.txt" "Deck does not contain exactly 52 cards (found 51)." "deck with missing card must be rejected"
+assert_contains "$TMP_DIR/missing_card_deck.txt" "Message: Error: Could not load deck: cards51" "missing-card LD message"
+
+run_game "LD default\nQQ\n" "$TMP_DIR/load_default_by_name.txt"
+assert_contains "$TMP_DIR/load_default_by_name.txt" "LAST Command: LD default" "LD should accept an extensionless deck name"
+assert_contains "$TMP_DIR/load_default_by_name.txt" "Message: OK" "LD default should load decks/default.txt"
+
 run_game "LD default.txt\nSW\nQQ\n" "$TMP_DIR/show_default.txt"
 assert_contains "$TMP_DIR/show_default.txt" "LAST Command: SW" "SW command should run"
 assert_contains "$TMP_DIR/show_default.txt" "| AC | 2C | 3C | 4C | 5C | 6C | 7C |" "SW should show loaded cards face up in row-wise startup view"
