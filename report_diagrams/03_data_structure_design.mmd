@@ -1,0 +1,29 @@
+classDiagram
+    class Card {
+        char rank
+        char suit
+        int face_up
+        Card* next
+    }
+
+    class Pile {
+        Card* top
+    }
+
+    class Deck {
+        Card* deck
+    }
+
+    class Columns {
+        Pile columns[7]
+    }
+
+    class Foundations {
+        Pile foundations[4]
+    }
+
+    Deck --> Card
+    Columns --> Pile
+    Foundations --> Pile
+    Pile --> Card
+    Card --> Card : next

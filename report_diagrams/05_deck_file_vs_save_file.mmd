@@ -1,0 +1,12 @@
+flowchart LR
+    DeckFile["Deck file<br/>decks/name.txt"]
+    SaveFile["Save file<br/>saves/name.txt"]
+
+    DeckFile --> DeckData["Stores only card order<br/>52 cards"]
+    SaveFile --> StateData["Stores full game state<br/>columns, foundations,<br/>face-up cards, timer, phase"]
+
+    DeckData --> LD["Loaded with LD"]
+    StateData --> L["Loaded with L"]
+
+    DeckData --> SD["Created with SD"]
+    StateData --> S["Created with S"]

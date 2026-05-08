@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant User
+    participant Terminal
+    participant GUI
+    participant Handler as Command Handler
+    participant Backend as Shared Backend Logic
+
+    User->>Terminal: Type command, e.g. SD
+    Terminal->>Handler: Send command string
+
+    User->>GUI: Click Save Deck
+    GUI->>Handler: Send command string, e.g. SD gui_deck.txt
+
+    Handler->>Backend: Execute same save logic
+    Backend-->>Handler: Result message
+    Handler-->>Terminal: Display message
+    Handler-->>GUI: Display/update state

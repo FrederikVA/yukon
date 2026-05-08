@@ -1,0 +1,33 @@
+flowchart TD
+    User["User"]
+
+    Terminal["Terminal Interface"]
+    GUI["SDL GUI Interface"]
+
+    CommandHandler["Command Handler"]
+
+    GameLogic["Game Logic"]
+    MoveLogic["Move Validation & Execution"]
+    ShuffleLogic["Shuffle Logic"]
+    FileHandler["File Handler"]
+    History["Undo / Redo History"]
+    Timer["Timer"]
+
+    Decks["decks/ folder<br/>Deck files"]
+    Saves["saves/ folder<br/>Saved game states"]
+
+    User --> Terminal
+    User --> GUI
+
+    Terminal --> CommandHandler
+    GUI --> CommandHandler
+
+    CommandHandler --> GameLogic
+    CommandHandler --> MoveLogic
+    CommandHandler --> ShuffleLogic
+    CommandHandler --> FileHandler
+    CommandHandler --> History
+    CommandHandler --> Timer
+
+    FileHandler --> Decks
+    FileHandler --> Saves

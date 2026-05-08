@@ -1,0 +1,35 @@
+flowchart TD
+    Start["User enters SD command"]
+
+    HasArg{"Filename argument?"}
+    UseArg["Use provided filename"]
+    UseCurrent["Use currentFile"]
+
+    AddTxt{"Ends with .txt?"}
+    AppendTxt["Append .txt"]
+    BuildPath["Build path: decks/filename.txt"]
+
+    EnsureDecks{"Does decks/ exist?"}
+    CreateDecks["Create decks/ folder"]
+    OpenFile["Open file with write mode"]
+    WriteCards["Write 52 cards"]
+    Done["Deck saved"]
+
+    Start --> HasArg
+    HasArg -->|Yes| UseArg
+    HasArg -->|No| UseCurrent
+
+    UseArg --> AddTxt
+    UseCurrent --> BuildPath
+
+    AddTxt -->|Yes| BuildPath
+    AddTxt -->|No| AppendTxt
+    AppendTxt --> BuildPath
+
+    BuildPath --> EnsureDecks
+    EnsureDecks -->|No| CreateDecks
+    EnsureDecks -->|Yes| OpenFile
+    CreateDecks --> OpenFile
+
+    OpenFile --> WriteCards
+    WriteCards --> Done
