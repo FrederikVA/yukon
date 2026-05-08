@@ -29,6 +29,13 @@ run_game() {
     printf "%b" "$input" | ./yukon > "$output"
 }
 
+run_game_in_dir() {
+    input=$1
+    output=$2
+    dir=$3
+    (cd "$dir" && printf "%b" "$input" | "$ROOT_DIR/yukon" > "$output")
+}
+
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"; rm -f decks/codextest.txt saves/codexstate.txt codexstate.txt best_time.txt' EXIT
 
@@ -54,6 +61,14 @@ run_game "LD dup\nQQ\n" "$TMP_DIR/duplicate_deck.txt"
 assert_contains "$TMP_DIR/duplicate_deck.txt" "Duplicate card detected: 'AH'" "duplicate deck must be rejected"
 assert_contains "$TMP_DIR/duplicate_deck.txt" "Message: Error: Could not load deck: dup" "duplicate LD message"
 
+run_game "LD cards51\nQQ\n" "$TMP_DIR/missing_card_deck.txt"
+assert_contains "$TMP_DIR/missing_card_deck.txt" "Deck does not contain exactly 52 cards (found 51)." "deck with missing card must be rejected"
+assert_contains "$TMP_DIR/missing_card_deck.txt" "Message: Error: Could not load deck: cards51" "missing-card LD message"
+
+run_game "LD default\nQQ\n" "$TMP_DIR/load_default_by_name.txt"
+assert_contains "$TMP_DIR/load_default_by_name.txt" "LAST Command: LD default" "LD should accept an extensionless deck name"
+assert_contains "$TMP_DIR/load_default_by_name.txt" "Message: OK" "LD default should load decks/default.txt"
+
 run_game "LD default.txt\nSW\nQQ\n" "$TMP_DIR/show_default.txt"
 assert_contains "$TMP_DIR/show_default.txt" "LAST Command: SW" "SW command should run"
 assert_contains "$TMP_DIR/show_default.txt" "| AC | 2C | 3C | 4C | 5C | 6C | 7C |" "SW should show loaded cards face up in row-wise startup view"
@@ -74,15 +89,23 @@ run_game "LD\nP\nC5:AS->F1\nQ\nQQ\n" "$TMP_DIR/foundation_bottom.txt"
 assert_contains "$TMP_DIR/foundation_bottom.txt" "Only the bottom card in a column can move to a foundation." "foundation move must use bottom column card"
 assert_contains "$TMP_DIR/foundation_bottom.txt" "Message: Move input was invalid or not allowed." "invalid foundation move message"
 
-run_game "LD\nSI 10\nQQ\n" "$TMP_DIR/split_shuffle.txt"
+run_game "LD\nSI 10\nSW\nQQ\n" "$TMP_DIR/split_shuffle.txt"
 assert_contains "$TMP_DIR/split_shuffle.txt" "| AC | JC | 2C | QC | 3C | KC | 4C |  F1 [    ]" "SI must honor supplied split"
-assert_contains "$TMP_DIR/split_shuffle.txt" "LAST Command: SI 10" "SI split command tracked"
+assert_contains "$TMP_DIR/split_shuffle.txt" "LAST Command: SW" "SW command tracked after SI split"
 
 run_game "LD\nSD codextest.txt\nQQ\n" "$TMP_DIR/save_deck.txt"
 assert_contains "$TMP_DIR/save_deck.txt" "Deck saved to file: decks/codextest.txt" "SD should save exact .txt filename"
 assert_contains "$TMP_DIR/save_deck.txt" "Message: OK" "SD should report OK"
 if [ ! -f decks/codextest.txt ]; then
     fail "SD did not create decks/codextest.txt"
+fi
+
+mkdir "$TMP_DIR/sd_no_args"
+run_game_in_dir "LD\nSD\nQQ\n" "$TMP_DIR/save_default_deck.txt" "$TMP_DIR/sd_no_args"
+assert_contains "$TMP_DIR/save_default_deck.txt" "Deck saved to file: decks/cards.txt" "SD with no args should save the default deck path"
+assert_contains "$TMP_DIR/save_default_deck.txt" "Message: OK" "SD with no args should report OK"
+if [ ! -f "$TMP_DIR/sd_no_args/decks/cards.txt" ]; then
+    fail "SD with no args did not create decks/cards.txt"
 fi
 
 run_game "LD\nP\nC1->F1\nU\nR\nQ\nQQ\n" "$TMP_DIR/undo_redo.txt"

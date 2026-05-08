@@ -130,6 +130,16 @@ static int ensureSaveDirectory(void) {
     return mkdir("saves", 0755) == 0;
 }
 
+static int ensureDeckDirectory(void) {
+    struct stat st;
+
+    if (stat("decks", &st) == 0) {
+        return S_ISDIR(st.st_mode);
+    }
+
+    return mkdir("decks", 0755) == 0;
+}
+
 static int countPileCards(Pile *pile) {
     int count = 0;
     Card *current = pile->top;
@@ -334,6 +344,11 @@ int saveDeckToFile(const char *filename) {
         setCurrentFileName(filename);
     }
     snprintf(fullPath, sizeof(fullPath), "decks/%s", currentFile);
+
+    if (!ensureDeckDirectory()) {
+        printf("Failed to create decks directory.\n");
+        return 0;
+    }
 
     FILE *f = fopen(fullPath, "w");
     if (!f) {

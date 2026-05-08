@@ -89,9 +89,9 @@ run_game "LD\nP\nC5:AS->F1\nQ\nQQ\n" "$TMP_DIR/foundation_bottom.txt"
 assert_contains "$TMP_DIR/foundation_bottom.txt" "Only the bottom card in a column can move to a foundation." "foundation move must use bottom column card"
 assert_contains "$TMP_DIR/foundation_bottom.txt" "Message: Move input was invalid or not allowed." "invalid foundation move message"
 
-run_game "LD\nSI 10\nQQ\n" "$TMP_DIR/split_shuffle.txt"
+run_game "LD\nSI 10\nSW\nQQ\n" "$TMP_DIR/split_shuffle.txt"
 assert_contains "$TMP_DIR/split_shuffle.txt" "| AC | JC | 2C | QC | 3C | KC | 4C |  F1 [    ]" "SI must honor supplied split"
-assert_contains "$TMP_DIR/split_shuffle.txt" "LAST Command: SI 10" "SI split command tracked"
+assert_contains "$TMP_DIR/split_shuffle.txt" "LAST Command: SW" "SW command tracked after SI split"
 
 run_game "LD\nSD codextest.txt\nQQ\n" "$TMP_DIR/save_deck.txt"
 assert_contains "$TMP_DIR/save_deck.txt" "Deck saved to file: decks/codextest.txt" "SD should save exact .txt filename"
